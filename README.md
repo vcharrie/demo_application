@@ -17,4 +17,4 @@ Below is a link to architecture documents describing the context, objectives and
 # traceability
 This project implements a complete DevSecOps traceability chain.
 The goal is to ensure that any stakeholder can navigate from a business requirement to the corresponding code, tests, CI results, artifacts, and deployed version — and back.
-Tracability for this project is detailed in the following document : [Tracability](docs/tracability.png)
+Tracability for this project is detailed in the following document : [Tracability](docs/tracability.md)
