@@ -8,8 +8,8 @@ This demo application is based on the latest architecture, technologies and CI/C
 
 # specification
 Below is a link to a functional and technical specification describing the context, objectives and architecture specificities covered by the application :
-[Spécification fonctionnelle et technique détaillée](docs/specification.md)
+[Detailed functional and technical specification](docs/specification.md)
 
 # architecture
-Below is a link to an architecture docu describing the context, objectives and architecture specificities covered by the application :
-[Spécification fonctionnelle et technique détaillée](docs/business_functional.drawio.png)
+Below is a link to architecture documents describing the context, objectives and architecture specificities covered by the application :
+[Architecture detailed diagrams](docs/business_functional.drawio.png)
