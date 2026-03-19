@@ -1,123 +1,53 @@
-# Spec v1 – Mini-application bancaire – Version initiale (CI basique)
+# Spec v1 – Secure Mini‑Application – Initial Version (Basic CI)
 
-### 
+## 1. Context
 
-### 1. Contexte
+This project is a **pedagogical secure mini‑application** designed to:
 
-Cette application est une **mini‑application bancaire pédagogique**, destinée à :
+- illustrate a clean and modular **Java / Spring Boot architecture**,
+- serve as a foundation for implementing a **DevSecOps‑oriented CI/CD pipeline** using GitHub Actions,
+- be presented during **technical interviews** as a concrete example of:
+  - architecture design,
+  - CI/CD implementation,
+  - progressive integration of security practices.
 
-- illustrer une **architecture Java / Spring Boot** inspirée des systèmes bancaires,
-- servir de support à la mise en place d’un **pipeline CI/CD DevSecOps** avec GitHub Actions,
-- être présentée en **entretien** comme un exemple concret de :
-    - conception d’architecture,
-    - mise en œuvre de CI/CD,
-    - prise en compte progressive de la sécurité.
+This Spec v1 describes the **first iteration** of the project. It is intentionally limited and will serve as the baseline for future versions (v2, v3, …).
 
-Cette Spec v1 décrit la **première itération** du projet, volontairement limitée, qui servira de base aux versions suivantes (v2, v3, …).
+---
 
-### 2. Objectifs de la version v1
+## 2. Goals of version v1
 
-- Disposer d’un **projet Java 17 / Spring Boot minimal** qui :
-    - compile,
-    - expose un endpoint REST simple,
-    - possède des tests unitaires.
-- Mettre en place un **pipeline CI basique** avec GitHub Actions :
-    - build Maven,
-    - exécution des tests,
-    - publication d’artefacts (JAR, rapports de tests),
-    - utilisation du cache Maven.
-- Poser les **fondations de l’architecture** (packages, couches) qui seront enrichies ensuite.
+- Provide a **minimal Java 17 / Spring Boot project** that:
+  - compiles successfully,
+  - exposes a simple REST endpoint,
+  - includes unit tests.
+- Set up a **basic CI pipeline** with GitHub Actions:
+  - Maven build,
+  - test execution,
+  - artifact publication (JAR, test reports),
+  - Maven caching.
+- Establish the **initial architectural foundations** (packages, layers) to be expanded later.
 
-### 3. Périmètre fonctionnel v1
+---
 
-Fonctionnalités très limitées, purement pédagogiques :
+## 3. Functional scope of v1
 
-- Exposer un endpoint REST :
-    - `GET /api/health`
-    - Réponse : un JSON simple, par exemple :
-        
-        json
-        
-        `{ "status": "UP", "version": "v1" }`
-        
-- Aucun vrai métier bancaire pour l’instant (pas encore de comptes, ni d’opérations).
-- L’objectif est de **valider la structure du projet et la chaîne CI**, pas encore le métier.
+Very limited, purely educational features:
 
-### 4. Architecture logique v1
+- Expose a REST endpoint:
+  - `GET /api/health`
+  - Response example:
+    ```json
+    { "status": "UP", "version": "v1" }
+    ```
+- No business domain logic yet.
+- The goal is to **validate the project structure and CI pipeline**, not implement functional features.
 
-- **Couches prévues (même si certaines sont encore vides ou très simples) :**
-    - `api` : controllers REST
-    - `service` : logique métier (placeholder pour v1)
-    - `domain` : entités métier (placeholder pour v1)
-    - `infrastructure` : persistance, intégrations externes (non utilisé en v1)
-- Pour v1 :
-    - un seul controller REST dans la couche `api`,
-    - un service minimal (ou directement dans le controller, mais la structure de packages doit déjà refléter la future architecture).
+---
 
-### 5. Architecture technique v1
+## 4. Logical architecture v1
 
-- **Langage :** Java 17
-- **Framework :** Spring Boot (version LTS compatible Java 17)
-- **Build :** Maven
-- **Packaging :** JAR exécutable (`spring-boot-maven-plugin`)
-- **Base de données :** aucune en v1 (H2 ou PostgreSQL arrivera en v2/v3)
-- **Configuration :**
-    - `application.yml` minimal
-    - gestion de la version de l’application via propriétés (ex : `app.version=v1`)
-
-### 6. Exigences non fonctionnelles v1
-
-- **Qualité minimale :**
-    - tests unitaires pour le controller (ou service) exposant `/api/health`,
-    - couverture de test non mesurée strictement en v1, mais au moins 1 test.
-- **Lisibilité :**
-    - code structuré par packages (`api`, `service`, `domain`, `infrastructure`),
-    - nommage explicite.
-- **Observabilité minimale :**
-    - logs de démarrage Spring Boot,
-    - logs simples sur l’appel de `/api/health` (optionnel en v1).
-
-### 7. Exigences CI/CD v1 (GitHub Actions)
-
-Objectif : **pipeline CI basique mais propre**.
-
-- **Déclencheurs :**
-    - `on: push` sur la branche principale (ex : `main`),
-    - `on: pull_request` vers `main`.
-- **Runners :**
-    - GitHub‑hosted runners (`ubuntu-latest`).
-- **Jobs :**
-    1. **Build & Test**
-        - checkout du code,
-        - setup de Java 17,
-        - cache Maven,
-        - `mvn -B clean verify`,
-        - publication des artefacts :
-            - JAR généré,
-            - rapports de tests (Surefire).
-- **Artefacts :**
-    - JAR de l’application,
-    - rapports de tests (XML/HTML).
-- **Objectifs pédagogiques CI :**
-    - comprendre la structure d’un workflow,
-    - manipuler jobs, steps, actions,
-    - utiliser le cache Maven,
-    - publier des artefacts.
-
-### 8. Livrables v1
-
-Dans le repo GitHub, la version v1 doit contenir :
-
-- **Code :**
-    - projet Maven Java 17 / Spring Boot,
-    - endpoint `/api/health`,
-    - au moins un test unitaire.
-- **CI :**
-    - fichier `.github/workflows/ci-basic.yml` (ou nom équivalent),
-    - pipeline fonctionnel (build + tests + artefacts + cache).
-- **Documentation :**
-    - cette Spec v1 (par exemple `docs/spec-v1.md`),
-    - un `README.md` qui :
-        - présente le projet,
-        - explique que v1 est la base d’un parcours DevSecOps,
-        - mentionne le lien avec GitHub Actions.
+- **Planned layers** (some still empty or minimal in v1):
+  - `api`: REST controllers  
+  - `service`: business logic (placeholder for v1)  
+  - `domain`: domain entities (placeholder for
