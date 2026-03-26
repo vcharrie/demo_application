@@ -1,5 +1,100 @@
 # Technical Specification – v2
 
+1. **Technical Architecture Overview**
+1.1 Application Type
+1.2 High‑Level Architecture
+1.3 Runtime Architecture
+1.4 Persistence
+1.5 API Style
+1.6 Build & CI/CD
+1.7 Security (v2 scope)
+1.8 Observability (v2 scope)
+2. **API Technical Details**
+2.1 API Style
+2.2 Request and Response Format
+2.3 Input Validation
+2.4 HTTP Status Codes
+2.5 Error Response Format
+2.6 Idempotency
+2.7 API Versioning
+2.8 Security (v2 scope)
+3. **Application Architecture (Technical)**
+3.1 Layered Architecture
+3.2 API Layer
+3.3 Service Layer
+3.4 Domain Layer
+3.5 Infrastructure Layer
+3.6 Layer Interaction
+3.7 Benefits
+4. **Persistence Layer**
+4.1 Overview
+4.2 Data Model
+4.3 Identifier Strategy
+4.4 Repository Abstraction
+4.5 Repository Implementation
+4.6 H2 Database Behavior
+4.7 Persistence Constraints
+4.8 Benefits
+5. **Security Architecture (v2 Scope)**
+5.1 Security Philosophy
+5.2 Authentication & Authorization
+5.3 Input Validation
+5.4 Error Handling & Information Exposure
+5.5 Logging Security
+5.6 Transport Security
+5.7 Dependency Security
+5.8 Container Security
+5.9 Limitations
+6. **Error Handling Architecture**
+6.1 Overview
+6.2 Error Categories
+6.3 Global Exception Handler
+6.4 Error Response Format
+6.5 Exception Mapping
+6.6 Security Considerations
+6.7 Logging Strategy
+6.8 Benefits
+7. **Logging & Observability (v2 Scope)**
+7.1 Overview
+7.2 Logging Objectives
+7.3 Logging Scope
+7.4 Log Levels
+7.5 Log Format
+7.6 Observability Scope
+7.7 CI Logging
+7.8 Security Considerations
+7.9 Benefits
+8. **Testing Strategy**
+8.1 Overview
+8.2 Types of Tests
+8.3 Coverage Expectations
+8.4 Test Data Strategy
+8.5 Error Scenario Testing
+8.6 Mocking Strategy
+8.7 CI Integration
+8.8 Benefits
+9. **CI/CD Pipeline (v2)**
+9.1 Overview
+9.2 Objectives
+9.3 Triggers
+9.4 Pipeline Stages
+9.5 Pipeline Structure
+9.6 Artefacts
+9.7 Failure Conditions
+9.8 Limitations
+9.9 Benefits
+10. **Containerization**
+10.1 Overview
+10.2 Objectives
+10.3 Dockerfile Structure
+10.4 Runtime Configuration
+10.5 Local Execution
+10.6 CI Execution
+10.7 Image Optimization
+10.8 Security Considerations
+10.9 Limitations
+10.10 Benefits
+
 # **1. Technical Architecture Overview**
 
 ## **1.1 Application Type**
