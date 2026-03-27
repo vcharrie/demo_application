@@ -454,6 +454,53 @@ This structure ensures a clean, maintainable, and testable architecture.
 - **Professional structure**: aligns with industry standards and interview expectations.
 - **DevSecOps‑friendly**: clean boundaries simplify scanning, testing, and containerization.
 
+## **3.8 Architectural Principles Applied**
+
+The layered architecture implemented in this project is directly inspired by three complementary architectural paradigms:
+
+- **Domain‑Driven Design (DDD)**
+- **Clean Architecture**
+- **Hexagonal Architecture (Ports & Adapters)**
+
+These principles guide the structure and responsibilities of each layer.
+
+### **Domain‑Driven Design (DDD)**
+
+The application follows key DDD concepts:
+
+- The **Domain Layer** contains the core business model (`Resource`) and domain rules.
+- The **Service Layer** orchestrates use cases and enforces functional rules.
+- Domain objects are **pure**, independent of frameworks and persistence.
+- Business errors are represented as **domain exceptions**.
+
+DDD ensures that the business logic remains central, explicit, and isolated from technical concerns.
+
+### **Clean Architecture**
+
+The project applies Clean Architecture principles through strict dependency direction:
+
+Code
+
+`API Layer → Service Layer → Domain Layer → Infrastructure Layer`
+
+- Inner layers never depend on outer layers.
+- The Domain Layer is completely independent.
+- The Infrastructure Layer can be replaced without impacting business logic.
+- The Service Layer contains application rules but no technical details.
+
+This structure guarantees maintainability, testability, and long‑term evolvability.
+
+### **Hexagonal Architecture (Ports & Adapters)**
+
+The architecture also aligns with the Hexagonal model:
+
+- The **Service Layer** acts as a *driving adapter*, invoking domain logic.
+- The **Infrastructure Layer** acts as a *driven adapter*, implementing persistence.
+- The Domain Layer exposes **interfaces (ports)** that the Infrastructure Layer implements.
+- The API Layer is another *driving adapter*, calling the Service Layer.
+
+This approach decouples the core business from external technologies and allows easy substitution of adapters (e.g., switching from H2 to PostgreSQL).
+
 # **4. Persistence Layer**
 
 ## **4.1 Overview**
