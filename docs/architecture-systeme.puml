@@ -1,0 +1,36 @@
+@startuml
+skinparam style strictuml
+skinparam packageStyle rectangle
+
+title Architecture CI/CD (vue système / opérationnelle)
+
+actor Developer
+
+package "GitHub" {
+  component Repo as "core-service Repository"
+}
+
+package "CI Pipeline" {
+  component MavenBuild as "Maven Build (mvn clean verify)"
+  component Tests as "Tests (unit & integration)"
+  component DockerBuild as "Docker Build (multi-stage Dockerfile)"
+}
+
+package "Container Registry" {
+  component Registry as "Registry (v3+)"
+}
+
+package "Runtime Environment" {
+  component RuntimeHost as "Docker Host / VM / Cluster"
+  component RuntimeContainer as "coreservice:latest (Container)"
+}
+
+Developer --> Repo : push / PR
+Repo --> MavenBuild : trigger CI
+MavenBuild --> Tests
+Tests --> DockerBuild
+DockerBuild --> Registry : push image
+Registry --> RuntimeHost : deploy
+RuntimeHost --> RuntimeContainer
+
+@enduml

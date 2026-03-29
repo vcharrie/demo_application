@@ -1,0 +1,35 @@
+@startuml
+skinparam style strictuml
+skinparam packageStyle rectangle
+
+title Architecture applicative en couches
+
+package "API Layer" {
+  class ResourceController
+  class ResourceRequest
+  class ResourceResponse
+  class GlobalExceptionHandler
+}
+
+package "Service Layer" {
+  class ResourceService
+}
+
+package "Domain Layer" {
+  class Resource
+  class DomainException
+}
+
+package "Infrastructure Layer" {
+  class ResourceRepository <<interface>>
+  class ResourceRepositoryImpl
+  class ResourceEntity
+}
+
+ResourceController --> ResourceService
+ResourceService --> Resource
+ResourceService --> ResourceRepository
+ResourceRepositoryImpl ..|> ResourceRepository
+ResourceRepositoryImpl --> ResourceEntity
+
+@enduml
