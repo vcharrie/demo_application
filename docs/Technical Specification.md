@@ -1294,6 +1294,8 @@ These capabilities will be introduced progressively in v3, v4, and v5.
 
 # **10. Containerization**
 
+*(Version enrichie, cohérente avec Dockerfile Option B + CI Option 2)*
+
 ## **10.1 Overview**
 
 The application is packaged and executed as a **Docker container**.
@@ -1305,7 +1307,7 @@ Containerization ensures:
 - isolation from host dependencies
 - alignment with modern DevSecOps practices
 
-The Docker image is built using a **multi‑stage Dockerfile** to keep the final image lightweight and secure.
+The Docker image is built using a **multi‑stage Dockerfile**, producing a lightweight and efficient runtime image.
 
 ## **10.2 Containerization Objectives**
 
@@ -1317,25 +1319,33 @@ The v2 containerization strategy aims to:
 - support both local execution and CI execution
 - prepare the foundation for security scanning in v3
 
+This version focuses on **professional, maintainable containerization**, without advanced hardening (planned for v3).
+
 ## **10.3 Dockerfile Structure**
 
-The Dockerfile follows a **multi‑stage build** pattern:
+The Dockerfile follows a **two‑stage multi‑stage build**:
 
-### **Stage 1 — Build Stage**
+### **Stage 1 — Build Stage (JDK 21)**
 
-- uses a JDK base image
+- uses a full JDK base image
 - compiles the application
 - runs tests (optional in v2)
-- produces an executable JAR
+- produces the final executable JAR
 
-### **Stage 2 — Runtime Stage**
+### **Stage 2 — Runtime Stage (JRE 21 lightweight)**
 
-- uses a lightweight JRE base image
+- uses a minimal JRE base image
 - copies only the final JAR
 - exposes the application port
 - defines the entrypoint
 
-This approach reduces the final image size and attack surface.
+This approach reduces:
+
+- final image size
+- attack surface
+- startup time
+
+while keeping the Dockerfile simple and readable.
 
 ## **10.4 Runtime Configuration**
 
@@ -1349,7 +1359,7 @@ Runtime behavior:
 - logs are written to stdout/stderr (container‑friendly)
 - no external configuration is required in v2
 
-Environment variables may be added in future releases (v3+).
+Environment variables and configuration profiles will be introduced in v3.
 
 ## **10.5 Local Execution**
 
@@ -1360,11 +1370,11 @@ Code
 `docker build -t coreservice .
 docker run -p 8080:8080 coreservice`
 
-This ensures that:
+This ensures:
 
-- the local environment matches the CI environment
+- local environment matches CI environment
 - no local Java installation is required
-- the application behaves identically everywhere
+- consistent behavior across machines
 
 ## **10.6 CI Execution**
 
@@ -1374,18 +1384,21 @@ In GitHub Actions:
 - the image is validated
 - optional smoke tests may run the container
 
-This guarantees that:
+The CI pipeline includes:
 
-- the Dockerfile is always valid
-- the application can run in a container
-- the runtime environment is reproducible
+- Maven build
+- Unit and integration tests
+- Docker image build (multi‑stage)
+
+The v2 CI **does not publish the image** to a registry.
+This will be introduced in v3 (CI/CD pipeline).
 
 ## **10.7 Image Size and Optimization**
 
 The v2 image is optimized through:
 
 - multi‑stage build
-- minimal runtime base image
+- minimal JRE runtime image
 - exclusion of build tools from the final image
 - no unnecessary OS packages
 
@@ -1393,7 +1406,7 @@ Further optimizations (non‑root user, distroless images) will be introduced in
 
 ## **10.8 Security Considerations (v2 scope)**
 
-Security is minimal in v2:
+Security is intentionally minimal in v2:
 
 - no secrets baked into the image
 - no sensitive environment variables

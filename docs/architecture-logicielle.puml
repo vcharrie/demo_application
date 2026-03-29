@@ -1,0 +1,51 @@
+@startuml
+skinparam style strictuml
+skinparam packageStyle rectangle
+
+title Vue dépendances techniques (architecture logicielle technique)
+
+package "API Layer" {
+  class "Spring Web" as SpringWeb
+  class "Jakarta Validation" as JakartaValidation
+}
+
+package "Service Layer" {
+  class "Business Logic" as BusinessLogic
+}
+
+package "Domain Layer" {
+  class "Pure Java Model" as DomainModel
+}
+
+package "Infrastructure Layer" {
+  class "Spring Data JPA" as SpringDataJPA
+  class "H2 Database" as H2
+}
+
+package "Build & Runtime" {
+  class Maven
+  class "JDK/JRE 21" as JDK21
+  class Docker
+  class "GitHub Actions" as GitHubActions
+}
+
+' Relations internes
+SpringWeb --> BusinessLogic
+JakartaValidation --> SpringWeb
+
+BusinessLogic --> DomainModel
+BusinessLogic --> SpringDataJPA
+
+SpringDataJPA --> H2
+
+' Relations techniques
+Maven --> SpringWeb
+Maven --> BusinessLogic
+Maven --> DomainModel
+Maven --> SpringDataJPA
+
+Docker --> Maven
+GitHubActions --> Maven
+GitHubActions --> Docker
+
+@enduml
