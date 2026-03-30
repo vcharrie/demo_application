@@ -28,7 +28,19 @@ jobs:
             ${{ runner.os }}-m2-
 
       - name: Build with Maven
-        run: mvn -q -DskipTests=false clean verify
+        run: mvn -DskipTests=false clean verify
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-test-reports
+          path: target/surefire-reports/
+
+      - name: Upload built JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: coreservice-jar
+          path: target/*.jar
 
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
