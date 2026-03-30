@@ -6,13 +6,16 @@ This demo application is based on the latest architecture, technologies and CI/C
 - gitlab ci/cd
 - security
 
-# specification
-Below is a link to a functional and technical specification describing the context, objectives and architecture specificities covered by the application :
-[Detailed functional and technical specification](docs/specification.md)
+# Specifications
+Below is a link to a functional specification describing the business and fucntional context, scope and objectives of the project :
+[Detailed functional specification](docs/Functional Specification.md)
+
+Below is a link to a functional specification describing the business and fucntional context, scope and objectives of the project :
+[Detailed technical specification](docs/Technical Specification.md)
 
 # architecture
 Below is a link to architecture documents describing the context, objectives and architecture specificities covered by the application :
-[Architecture detailed diagrams](docs/business_functional.drawio.png)
+[Architecture detailed diagrams](docs/architecture.png)
 
 # traceability
 This project implements a complete DevSecOps traceability chain.
