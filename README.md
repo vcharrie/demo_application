@@ -8,10 +8,10 @@ This demo application is based on the latest architecture, technologies and CI/C
 
 # Specifications
 Below is a link to a functional specification describing the business and fucntional context, scope and objectives of the project :
-[Detailed functional specification](docs/Functional Specification.md)
+[Detailed functional specification](docs/Functional%20Specification.md)
 
 Below is a link to a functional specification describing the business and fucntional context, scope and objectives of the project :
-[Detailed technical specification](docs/Technical Specification.md)
+[Detailed technical specification](docs/Technical%20Specification.md)
 
 # architecture
 Below is a link to architecture documents describing the context, objectives and architecture specificities covered by the application :
