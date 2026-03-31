@@ -1,0 +1,4 @@
+app:
+  security:
+    token: "change-me"
+    salt: "change-me"
