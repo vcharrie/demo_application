@@ -15,10 +15,7 @@ Below is a link to a functional specification describing the business and fucnti
 
 # architecture
 Below is a link to architecture documents describing the context, objectives and architecture specificities covered by the application :
-[Business,functional and application architecture diagrams](docs/business_functional_application_architecture.png)
-[Logical architecture diagrams](docs/logical_architecture.png)
-[Softwaree architecture diagrams](docs/software_architecture.png)
-
+[Architecture detailed diagrams](docs/architecture.png)
 
 # traceability
 This project implements a complete DevSecOps traceability chain.
