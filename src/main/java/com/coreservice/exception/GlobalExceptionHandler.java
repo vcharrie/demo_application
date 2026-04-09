@@ -7,6 +7,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.coreservice.domain.exception.ResourceNotFoundException;
+
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,5 +79,15 @@ public class GlobalExceptionHandler {
                         "error", "INTERNAL_ERROR",
                         "message", "Unexpected error occurred"
                 ));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex) {
+    return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(Map.of(
+                    "error", "NOT_FOUND",
+                    "message", ex.getMessage()
+            ));
     }
 }
