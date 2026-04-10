@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class ResourceServiceImplTest {
@@ -20,20 +22,21 @@ class ResourceServiceImplTest {
 
     @Test
     void shouldCreateResource() {
-        Resource resource = new Resource("id-1", "Test", "desc");
+        UUID randomUuid = UUID.randomUUID();
+        Resource resource = new Resource(randomUuid.toString(), "Test", "desc");
 
         when(repository.findByName("Test")).thenReturn(Optional.empty());
-        when(repository.save(any())).thenReturn(new ResourceEntity("id-1", "Test", "desc"));
+        when(repository.save(any())).thenReturn(new ResourceEntity(randomUuid, "Test", "desc"));
 
         Resource result = service.create(resource);
 
-        assertThat(result.getId()).isEqualTo("id-1");
+        assertThat(result.getId()).isEqualTo(randomUuid.toString());
         verify(repository).save(any());
     }
 
     @Test
     void shouldThrowConflictWhenNameExists() {
-        when(repository.findByName("Test")).thenReturn(Optional.of(new ResourceEntity("id-1", "Test", "desc")));
+        when(repository.findByName("Test")).thenReturn(Optional.of(new ResourceEntity(UUID.randomUUID(), "Test", "desc")));
 
         assertThatThrownBy(() -> service.create(new Resource("id-2", "Test", "desc")))
                 .isInstanceOf(ResourceConflictException.class);
@@ -41,7 +44,7 @@ class ResourceServiceImplTest {
 
     @Test
     void shouldFindAll() {
-        when(repository.findAll()).thenReturn(List.of(new ResourceEntity("id-1", "Test", "desc")));
+        when(repository.findAll()).thenReturn(List.of(new ResourceEntity(UUID.randomUUID(), "Test", "desc")));
 
         List<Resource> result = service.findAll();
 
@@ -50,9 +53,10 @@ class ResourceServiceImplTest {
 
     @Test
     void shouldThrowNotFoundWhenMissing() {
-        when(repository.findById("id-1")).thenReturn(Optional.empty());
+        UUID randomUuid = UUID.randomUUID();
+        when(repository.findById(randomUuid)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.findById("id-1"))
+        assertThatThrownBy(() -> service.findById(randomUuid.toString()))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }
