@@ -26,7 +26,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldReturnBadRequestForIllegalArgument() throws Exception {
         mockMvc.perform(get("/resources/invalid-uuid"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
 }
 
