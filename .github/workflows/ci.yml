@@ -2,7 +2,7 @@ name: CI/CD - Build, Test, Package, Dockerize & Deploy
 
 on:
   push:
-    branches: [ "main", "v2_dev" ]
+    branches: [ "main", "v3_dev" ]
   pull_request:
 
 jobs:
