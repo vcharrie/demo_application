@@ -1,5 +1,7 @@
 package com.coreservice.infrastructure.entity;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -7,7 +9,7 @@ import jakarta.persistence.*;
 public class ResourceEntity {
 
     @Id
-    private String id;
+    private UUID id;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -19,13 +21,13 @@ public class ResourceEntity {
         // JPA only
     }
 
-    public ResourceEntity(String id, String name, String description) {
+    public ResourceEntity(UUID id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 

@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,7 +20,7 @@ class ResourceRepositoryIT {
 
     @Test
     void shouldSaveAndRetrieveResource() {
-        ResourceEntity entity = new ResourceEntity("id-1", "Test", "desc");
+        ResourceEntity entity = new ResourceEntity(UUID.fromString("id-1"), "Test", "desc");
         repository.save(entity);
 
         Optional<ResourceEntity> found = repository.findById("id-1");
@@ -30,7 +31,8 @@ class ResourceRepositoryIT {
 
     @Test
     void shouldFindByName() {
-        repository.save(new ResourceEntity("id-2", "UniqueName", "desc"));
+        ResourceEntity entity = new ResourceEntity(UUID.fromString("id-2"), "Test", "desc");
+        repository.save(entity);
 
         Optional<ResourceEntity> found = repository.findByName("UniqueName");
 

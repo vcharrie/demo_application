@@ -9,6 +9,7 @@ import com.coreservice.infrastructure.repository.ResourceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
@@ -17,6 +18,14 @@ public class ResourceServiceImpl implements ResourceService {
 
     public ResourceServiceImpl(ResourceRepository repository) {
         this.repository = repository;
+    }
+
+    private UUID validateAndParseUuid(String id) {
+        try {
+            return UUID.fromString(id);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("Invalid UUID format: " + id);
+        }
     }
 
     @Override
@@ -40,7 +49,8 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Resource findById(String id) {
-        return repository.findById(id)
+        UUID uuid = validateAndParseUuid(id);
+        return repository.findById(uuid)
                 .map(ResourceMapper::toDomain)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
     }
