@@ -8,20 +8,18 @@ public class Resource {
     private final String name;
     private final String description;
 
-    public Resource(String id, String name, String description) {
-        validateName(name);
-        this.id = Objects.requireNonNull(id, "id must not be null");
+    
+    public Resource(String name, String description) {
+        this.id = null;
         this.name = name;
         this.description = description;
     }
 
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Resource name must not be empty");
-        }
-        if (name.length() > 100) {
-            throw new IllegalArgumentException("Resource name must not exceed 100 characters");
-        }
+
+    public Resource(String id, String name, String description) {
+        this.id = Objects.requireNonNull(id);
+        this.name = name;
+        this.description = description;
     }
 
     public String getId() {

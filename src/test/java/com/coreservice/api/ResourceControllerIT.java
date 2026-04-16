@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 class ResourceControllerIT {
 
     @Autowired
@@ -43,5 +43,17 @@ class ResourceControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenIdIsNotUUID() throws Exception {
+        mockMvc.perform(get("/resources/not-a-uuid"))
+               .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenIdIsNull() throws Exception {
+        mockMvc.perform(get("/resources/"))
+               .andExpect(status().isNotFound()); // ou 400 selon ton mapping
     }
 }
