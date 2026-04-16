@@ -6,26 +6,21 @@ import com.coreservice.domain.exception.ResourceConflictException;
 import com.coreservice.domain.exception.ResourceNotFoundException;
 import com.coreservice.infrastructure.mapper.ResourceMapper;
 import com.coreservice.infrastructure.repository.ResourceRepository;
+
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Validated
 public class ResourceServiceImpl implements ResourceService {
 
     private final ResourceRepository repository;
 
     public ResourceServiceImpl(ResourceRepository repository) {
         this.repository = repository;
-    }
-
-    private UUID validateAndParseUuid(String id) {
-        try {
-            return UUID.fromString(id);
-        } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("Invalid UUID format: " + id);
-        }
     }
 
     @Override
@@ -48,8 +43,10 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public Resource findById(String id) {
-        UUID uuid = validateAndParseUuid(id);
+    public Resource findById(
+            String id
+    ) {
+        UUID uuid = UUID.fromString(id);
         return repository.findById(uuid)
                 .map(ResourceMapper::toDomain)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
