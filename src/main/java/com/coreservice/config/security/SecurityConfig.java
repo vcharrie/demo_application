@@ -17,14 +17,26 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/health","/actuator/health").permitAll()
-                        .anyRequest().authenticated()
-                );
+            .csrf(csrf -> csrf.disable())
+
+            // Basic Auth, version lambda (pas de withDefaults())
+            .httpBasic(httpBasic -> { })
+
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().authenticated()
+            )
+
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, authEx) -> {
+                    throw authEx;
+                })
+                .accessDeniedHandler((req, res, accessDeniedEx) -> {
+                    throw accessDeniedEx;
+                })
+            );
 
         return http.build();
     }
 }
-

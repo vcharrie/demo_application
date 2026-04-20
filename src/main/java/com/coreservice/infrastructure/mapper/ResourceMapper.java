@@ -11,8 +11,13 @@ public final class ResourceMapper {
     private ResourceMapper() {}
 
     public static ResourceEntity toEntity(Resource resource) {
+         UUID id = resource.getId() == null
+            ? null
+            : UUID.fromString(resource.getId());
+
+        
         return new ResourceEntity(
-                UUID.fromString(resource.getId()),
+                id,
                 resource.getName(),
                 resource.getDescription()
         );

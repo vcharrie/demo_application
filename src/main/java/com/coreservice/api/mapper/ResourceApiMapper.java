@@ -7,7 +7,7 @@ import com.coreservice.domain.Resource;
 public class ResourceApiMapper {
 
     public static Resource toDomain(ResourceRequest request) {
-        return new Resource(null, request.name(), request.description());
+        return new Resource(request.name(), request.description());
     }
 
     public static ResourceResponse toResponse(Resource resource) {
