@@ -1,0 +1,70 @@
+name: Cleanup old artifacts
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # Tous les jours à 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch all artifacts
+        id: fetch
+        run: |
+          gh api repos/${{ github.repository }}/actions/artifacts --paginate > artifacts.json
+          echo "count=$(jq '.artifacts | length' artifacts.json)" >> $GITHUB_OUTPUT
+
+      - name: Process artifacts
+        if: steps.fetch.outputs.count != '0'
+        run: |
+          echo "🔍 Total artifacts: $(jq '.artifacts | length' artifacts.json)"
+
+          # 1) IDENTIFIER LES ARTEFACTS DE RELEASE (NE PAS TOUCHER)
+          RELEASE_IDS=$(jq -r '.artifacts[] | select(.workflow_run.event == "release") | .id' artifacts.json)
+
+          echo "📦 Release artifacts (kept):"
+          echo "$RELEASE_IDS"
+
+          # 2) IDENTIFIER LES ARTEFACTS DE MAIN
+          MAIN_ARTIFACTS=$(jq -r '.artifacts[] | select(.workflow_run.head_branch == "main")' artifacts.json)
+          echo "$MAIN_ARTIFACTS" > main.json
+
+          # Garder les 2 plus récents sur main
+          MAIN_KEEP_IDS=$(jq -r 'sort_by(.created_at) | reverse | .[:2] | .[].id' main.json)
+
+          echo "📌 Main branch artifacts kept (2 most recent):"
+          echo "$MAIN_KEEP_IDS"
+
+          # 3) IDENTIFIER LES ARTEFACTS À SUPPRIMER
+          DELETE_IDS=$(jq -r '
+            .artifacts[]
+            | select(.workflow_run.event != "release")        # pas les releases
+            | select(.workflow_run.head_branch != "main")     # pas main
+            | .id
+          ' artifacts.json)
+
+          # Ajouter les artefacts main sauf les 2 derniers
+          DELETE_IDS_MAIN=$(jq -r '
+            sort_by(.created_at) | reverse | .[2:] | .[].id
+          ' main.json)
+
+          # Fusionner les deux listes
+          ALL_DELETE=$(printf "%s\n%s" "$DELETE_IDS" "$DELETE_IDS_MAIN" | sort -u)
+
+          echo "🗑️ Artifacts to delete:"
+          echo "$ALL_DELETE"
+
+          if [ -z "$ALL_DELETE" ]; then
+            echo "Nothing to delete."
+            exit 0
+          fi
+
+          # 4) SUPPRESSION
+          for ID in $ALL_DELETE; do
+            echo "Deleting artifact $ID..."
+            gh api --method DELETE repos/${{ github.repository }}/actions/artifacts/$ID
+          done
+
+          echo "✅ Cleanup complete."
