@@ -1,9 +1,3 @@
-
----
-
-### `docs/ci-cd/ci-cd-pipeline.md`
-
-```markdown
 # CI/CD Pipeline – Global Documentation
 *(File: `docs/ci-cd/ci-cd-pipeline.md`)*
 
