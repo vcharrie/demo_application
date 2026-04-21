@@ -1,9 +1,3 @@
-
----
-
-### `docs/ci-cd/cd-build-pipeline.md`
-
-```markdown
 # CD – Deploy Pipeline Documentation
 *(File: `docs/ci-cd/cd-build-pipeline.md`)*
 
