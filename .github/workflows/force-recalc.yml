@@ -1,0 +1,19 @@
+name: Force GitHub Actions quota recalculation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  force-recalc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create dummy file
+        run: echo "test" > dummy.txt
+
+      - name: Try uploading dummy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dummy-artifact
+          path: dummy.txt
+          retention-days: 1
