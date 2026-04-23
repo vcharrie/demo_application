@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 public class ResourceEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, length = 100)

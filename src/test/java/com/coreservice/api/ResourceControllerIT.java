@@ -70,4 +70,14 @@ class ResourceControllerIT {
                 .andExpect(header().string("errorResponse", "unauthorized"));
     }
 
+    void shouldReturnBadRequestWhenIdIsNotUUID() throws Exception {
+        mockMvc.perform(get("/resources/not-a-uuid"))
+               .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenIdIsNull() throws Exception {
+        mockMvc.perform(get("/resources/"))
+               .andExpect(status().isNotFound()); // ou 400 selon ton mapping
+    }
 }

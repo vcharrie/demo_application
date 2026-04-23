@@ -5,6 +5,7 @@ import com.coreservice.domain.exception.ResourceConflictException;
 import com.coreservice.domain.exception.ResourceNotFoundException;
 import com.coreservice.infrastructure.entity.ResourceEntity;
 import com.coreservice.infrastructure.repository.ResourceRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -17,8 +18,18 @@ import static org.mockito.Mockito.*;
 
 class ResourceServiceImplTest {
 
-    private final ResourceRepository repository = mock(ResourceRepository.class);
-    private final ResourceServiceImpl service = new ResourceServiceImpl(repository);
+    private ResourceRepository repository;
+    private ResourceServiceImpl service;
+
+    @BeforeEach
+    void setup() {
+        repository = mock(ResourceRepository.class);
+        service = new ResourceServiceImpl(repository);
+    }
+
+    // ------------------------------------------------------------
+    // TESTS MÉTIER
+    // ------------------------------------------------------------
 
     @Test
     void shouldCreateResource() {
@@ -26,7 +37,8 @@ class ResourceServiceImplTest {
         Resource resource = new Resource(randomUuid.toString(), "Test", "desc");
 
         when(repository.findByName("Test")).thenReturn(Optional.empty());
-        when(repository.save(any())).thenReturn(new ResourceEntity(randomUuid, "Test", "desc"));
+        when(repository.save(any()))
+                .thenReturn(new ResourceEntity(randomUuid, "Test", "desc"));
 
         Resource result = service.create(resource);
 
@@ -36,7 +48,8 @@ class ResourceServiceImplTest {
 
     @Test
     void shouldThrowConflictWhenNameExists() {
-        when(repository.findByName("Test")).thenReturn(Optional.of(new ResourceEntity(UUID.randomUUID(), "Test", "desc")));
+        when(repository.findByName("Test"))
+                .thenReturn(Optional.of(new ResourceEntity(UUID.randomUUID(), "Test", "desc")));
 
         assertThatThrownBy(() -> service.create(new Resource("id-2", "Test", "desc")))
                 .isInstanceOf(ResourceConflictException.class);
@@ -44,7 +57,8 @@ class ResourceServiceImplTest {
 
     @Test
     void shouldFindAll() {
-        when(repository.findAll()).thenReturn(List.of(new ResourceEntity(UUID.randomUUID(), "Test", "desc")));
+        when(repository.findAll())
+                .thenReturn(List.of(new ResourceEntity(UUID.randomUUID(), "Test", "desc")));
 
         List<Resource> result = service.findAll();
 
@@ -60,4 +74,3 @@ class ResourceServiceImplTest {
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 }
-
