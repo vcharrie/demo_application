@@ -25,8 +25,12 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> { })
 
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().authenticated()
-            )
+               // 👉 Healthcheck accessible sans authentification
+              .requestMatchers("/actuator/health").permitAll()
+
+              // 👉 Tout le reste nécessite Basic Auth
+              .anyRequest().authenticated()
+         )
 
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((req, res, authEx) -> {
