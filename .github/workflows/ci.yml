@@ -30,17 +30,18 @@ jobs:
       - name: Build with Maven
         run: mvn -DskipTests=false clean verify
 
-      - name: Upload test reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: maven-test-reports
-          path: target/surefire-reports/
+     # temporarily disabled to allow ci build success on github action, the time the github actions quota for artifacts is reset by github   
+     # - name: Upload test reports
+     #   uses: actions/upload-artifact@v4
+     #   with:
+     #     name: maven-test-reports
+     #     path: target/surefire-reports/
 
-      - name: Upload built JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: coreservice-jar
-          path: target/*.jar
+     # - name: Upload built JAR
+     #   uses: actions/upload-artifact@v4
+     #   with:
+     #     name: coreservice-jar
+     #     path: target/*.jar
 
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
