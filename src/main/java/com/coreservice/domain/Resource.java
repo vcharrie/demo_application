@@ -2,8 +2,6 @@ package com.coreservice.domain;
 
 import java.util.Objects;
 
-import jakarta.annotation.Generated;
-
 public class Resource {
 
     private final String id;
