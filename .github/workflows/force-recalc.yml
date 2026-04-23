@@ -2,6 +2,9 @@ name: Force GitHub Actions quota recalculation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/v3/issue-24-validation-error-mapper
 
 jobs:
   force-recalc:
