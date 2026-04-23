@@ -6,6 +6,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.coreservice.domain.exception.ResourceNotFoundException;
 
@@ -90,4 +91,13 @@ public class GlobalExceptionHandler {
                     "message", ex.getMessage()
             ));
     }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<Object> handleNotFound(NoHandlerFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .header("errorResponse", "not_found")
+                .body(Map.of("error", "NOT_FOUND"));
+    }
+
+
 }
