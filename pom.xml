@@ -85,6 +85,132 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!--
+				Maven Enforcer Plugin
+				This plugin enforces structural rules on the project before any build step.
+				It guarantees that the project is built with the correct environment,
+				avoids hidden configuration issues, and ensures deterministic CI builds.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.4.1</version>
+
+				<executions>
+					<execution>
+						<id>enforce-rules</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+
+						<configuration>
+							<rules>
+
+								<!--
+									1) Require Maven version
+									
+									Ensures the project is built with Maven 3.9+.
+									This avoids inconsistent behavior between developers
+									and ensures CI uses a modern Maven version.
+								-->
+								<requireMavenVersion>
+									<version>[3.9,)</version>
+								</requireMavenVersion>
+
+								<!--
+									2) Require Java version
+									
+									Forces the use of Java 21 or higher.
+									Prevents accidental builds with older JDKs,
+									which could cause runtime or compilation inconsistencies.
+								-->
+								<requireJavaVersion>
+									<version>[21,)</version>
+								</requireJavaVersion>
+
+							</rules>
+
+							<!--
+								Fail the build immediately if any rule is violated.
+								This is essential for CI/CD discipline.
+							-->
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.3.1</version>
+
+				<executions>
+					<execution>
+						<id>checkstyle-validation</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<!-- Fichier de configuration personnalisé -->
+							<configLocation>config/checkstyle/checkstyle.xml</configLocation>
+
+							<!-- Échoue le build si violation -->
+							<failOnViolation>true</failOnViolation>
+
+							<!-- Génère un rapport XML pour CI -->
+							<outputFile>target/checkstyle-result.xml</outputFile>
+							<outputFileFormat>xml</outputFileFormat>
+
+							<!-- Ne pas polluer la console -->
+							<consoleOutput>false</consoleOutput>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.21.0</version>
+                <configuration>
+                    <rulesets>
+                        <ruleset>config/pmd-ruleset.xml</ruleset>
+                    </rulesets>
+                    <failOnViolation>true</failOnViolation>
+                    <printFailingErrors>true</printFailingErrors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.8.3.0</version>
+                <configuration>
+                    <effort>max</effort>
+                    <threshold>Low</threshold>
+                    <excludeFilterFile>config/spotbugs-exclude.xml</excludeFilterFile>
+                    <xmlOutput>true</xmlOutput>
+                    <failOnError>true</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

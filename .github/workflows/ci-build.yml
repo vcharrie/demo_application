@@ -45,6 +45,30 @@ jobs:
 #          name: maven-test-reports
 #          path: target/surefire-reports/
 
+#      - name: Upload Checkstyle report
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: checkstyle-report
+#          path: target/checkstyle-result.xml
+
+#      - name: Upload PMD report
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: pmd-report
+#          path: target/pmd.xml
+          
+      # --- SpotBugs : génération du rapport ---
+      - name: Run SpotBugs
+        run: mvn -B spotbugs:spotbugs
+
+        # --- SpotBugs : upload du rapport XML ---
+
+#      - name: Upload SpotBugs report
+#       uses: actions/upload-artifact@v4
+#        with:
+#            name: spotbugs-report
+#            path: target/spotbugsXml.xml    
+
 #      - name: Upload built JAR
 #        uses: actions/upload-artifact@v4
 #        with:

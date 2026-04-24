@@ -43,7 +43,7 @@ public class ResourceController {
     public ResponseEntity<ResourceResponse> getById(
         @PathVariable
         @Pattern(regexp = "^[a-fA-F0-9-]{36}$")
-        String id){
+        String id) {
         var resource = service.findById(id);
         return ResponseEntity.ok(ResourceApiMapper.toResponse(resource));
     }
