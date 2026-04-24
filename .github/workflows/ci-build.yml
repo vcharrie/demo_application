@@ -67,7 +67,12 @@ jobs:
 #       uses: actions/upload-artifact@v4
 #        with:
 #            name: spotbugs-report
-#            path: target/spotbugsXml.xml    
+#            path: target/spotbugsXml.xml   
+
+      - name: SonarCloud Scan
+        run: mvn -B verify sonar:sonar
+        env:
+           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 #      - name: Upload built JAR
 #        uses: actions/upload-artifact@v4
