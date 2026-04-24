@@ -1,5 +1,6 @@
 package com.coreservice.logging;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,7 +27,7 @@ public final class LoggingSecurityRules {
             return value;
         }
 
-        String lowerKey = key.toLowerCase();
+        String lowerKey = key.toLowerCase(Locale.ROOT);
 
         boolean isSensitive = SENSITIVE_KEYS.stream()
                 .anyMatch(lowerKey::contains);

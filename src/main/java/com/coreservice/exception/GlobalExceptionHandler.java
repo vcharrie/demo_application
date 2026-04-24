@@ -18,6 +18,10 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String ERROR = "error";
+    private static final String MESSAGE = "message";
+    private static final String DETAILS = "details";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -29,27 +33,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
-                        "error", "VALIDATION_ERROR",
-                        "message", "Invalid request",
-                        "details", errors
-                ));
+                        ERROR, "VALIDATION_ERROR",
+                        MESSAGE, "Invalid request",
+                        DETAILS, errors));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex) {
         Map<String, String> errors = new HashMap<>();
 
-        ex.getConstraintViolations().forEach(v ->
-                errors.put(v.getPropertyPath().toString(), v.getMessage())
-        );
+        ex.getConstraintViolations().forEach(v -> errors.put(v.getPropertyPath().toString(), v.getMessage()));
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
-                        "error", "VALIDATION_ERROR",
-                        "message", "Invalid request",
-                        "details", errors
-                ));
+                        ERROR, "VALIDATION_ERROR",
+                        MESSAGE, "Invalid request",
+                        DETAILS, errors));
     }
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -57,9 +57,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of(
-                        "error", "NOT_FOUND",
-                        "message", ex.getMessage()
-                ));
+                        ERROR, "NOT_FOUND",
+                        MESSAGE, ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -67,9 +66,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
-                        "error", "BAD_REQUEST",
-                        "message", ex.getMessage()
-                ));
+                        ERROR, "BAD_REQUEST",
+                        MESSAGE, ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -77,19 +75,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of(
-                        "error", "INTERNAL_ERROR",
-                        "message", "Unexpected error occurred"
-                ));
+                        ERROR, "INTERNAL_ERROR",
+                        MESSAGE, "Unexpected error occurred"));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex) {
-    return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(Map.of(
-                    "error", "NOT_FOUND",
-                    "message", ex.getMessage()
-            ));
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        ERROR, "NOT_FOUND",
+                        MESSAGE, ex.getMessage()));
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)

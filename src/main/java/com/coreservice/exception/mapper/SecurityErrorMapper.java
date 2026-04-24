@@ -5,7 +5,7 @@ import org.springframework.security.core.AuthenticationException;
 
 public final class SecurityErrorMapper {
 
-    public record SecurityError(String error, String message) {}
+    public record SecurityError(String error, String message) { }
 
     public static SecurityError from(AuthenticationException ex) {
         return new SecurityError("UNAUTHORIZED", ex.getMessage());

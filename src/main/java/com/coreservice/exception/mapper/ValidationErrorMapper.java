@@ -38,5 +38,5 @@ public final class ValidationErrorMapper {
         return lastDot != -1 ? path.substring(lastDot + 1) : path;
     }
 
-    public record ValidationError(String field, String message) {}
+    public record ValidationError(String field, String message) { }
 }

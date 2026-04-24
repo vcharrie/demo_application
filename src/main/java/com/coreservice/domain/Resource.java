@@ -2,24 +2,21 @@ package com.coreservice.domain;
 
 import java.util.Objects;
 
-import jakarta.annotation.Generated;
-
 public class Resource {
 
-    private final String id;
+    private String id;
     private final String name;
     private final String description;
 
-    public Resource(String id, String name, String description) {
+    public Resource(String name, String description) {
         validateName(name);
-        this.id = Objects.requireNonNull(id, "id must not be null");
         this.name = name;
         this.description = description;
     }
-
-    public Resource(String name, String description) {
+    
+    public Resource(String id, String name, String description) {
         validateName(name);
-        this.id = null;
+        this.id = Objects.requireNonNull(id, "id must not be null");
         this.name = name;
         this.description = description;
     }
