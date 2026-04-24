@@ -2,12 +2,14 @@ package com.coreservice.domain;
 
 import java.util.Objects;
 
+
 public class Resource {
 
     private String id;
     private final String name;
     private final String description;
 
+    
     public Resource(String name, String description) {
         validateName(name);
         this.name = name;
