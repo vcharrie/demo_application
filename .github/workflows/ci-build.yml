@@ -16,7 +16,7 @@ jobs:
     env:
       IMAGE_NAME: coreservice
       REGISTRY: ghcr.io/${{ secrets.GHCR_USERNAME }}
-      VERSION: ${{ github.ref_name }}
+      VERSION: ${{ github.ref_name || 'unknown' }}
       COMMIT_SHA: ${{ github.sha }}
 
 
@@ -96,15 +96,21 @@ jobs:
         id: date
         run: echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
+      - name: Sanitize VERSION
+        id: sanitize
+        run: |
+          CLEAN_VERSION=$(echo "${VERSION}" | tr '/' '-' | tr ' ' '-' )
+          echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+
       - name: Build Docker image (optimized)
         run: |
           docker build \
             --build-arg BUILD_DATE="${BUILD_DATE}" \
             --build-arg VCS_REF="${COMMIT_SHA}" \
-            --build-arg VERSION="${VERSION}" \
+            --build-arg VERSION="${{ steps.sanitize.outputs.version }}" \
             -t ${REGISTRY}/${IMAGE_NAME}:latest \
             -t ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA} \
-            -t ${REGISTRY}/${IMAGE_NAME}:${VERSION} \
+            -t ${REGISTRY}/${IMAGE_NAME}:${{ steps.sanitize.outputs.version }} \
             .
 
       - name: Push Docker images
