@@ -12,8 +12,16 @@ jobs:
   # Build job: compiles the application, runs tests, builds a Docker image, and pushes it to GHCR.
   build:
     runs-on: ubuntu-latest
+   
+    env:
+      IMAGE_NAME: coreservice
+      REGISTRY: ghcr.io/${{ secrets.GHCR_USERNAME }}
+      VERSION: ${{ github.ref_name }}
+      COMMIT_SHA: ${{ github.sha }}
+
 
     steps:
+
       # Step 1: Check out the repository code
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,13 +92,41 @@ jobs:
       - name: Log in to GHCR
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
 
-      # Step 8: Build the Docker image
-      - name: Build Docker image
-        run: docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/coreservice:latest .
+      - name: Generate build date
+        id: date
+        run: echo "date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
-      # Step 9: Push the Docker image to GHCR
-      - name: Push Docker image
-        run: docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/coreservice:latest
+      - name: Build Docker image (optimized)
+        run: |
+          docker build \
+            --build-arg BUILD_DATE="${BUILD_DATE}" \
+            --build-arg VCS_REF="${COMMIT_SHA}" \
+            --build-arg VERSION="${VERSION}" \
+            -t ${REGISTRY}/${IMAGE_NAME}:latest \
+            -t ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA} \
+            -t ${REGISTRY}/${IMAGE_NAME}:${VERSION} \
+            .
+
+      - name: Push Docker images
+        run: |
+          docker push ${REGISTRY}/${IMAGE_NAME}:latest
+          docker push ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
+          docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}
+
+      - name: Extract image digest
+        id: digest
+        run: |
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA})
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+      
+      - name: Save digest to file
+        run: echo "${{ steps.digest.outputs.digest }}" > digest.txt    
+      
+      #- name: Upload image digest
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: docker-image-digest
+      #    path: digest.txt    
 
 
   # Deploy job: pulls the image, runs it, and performs a smoke test.
