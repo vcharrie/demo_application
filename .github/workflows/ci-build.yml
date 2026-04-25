@@ -4,7 +4,7 @@ name: CI/CD - Build, Test, Package, Dockerize & Deploy
 
 on:
   push:
-    branches: [ "main", "v3_dev" ]
+    branches: [ "main", "v3_dev", "feature/v3/issue-55-security-scans" ]
   pull_request:
 
 jobs:
