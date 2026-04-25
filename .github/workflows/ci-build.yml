@@ -117,7 +117,7 @@ jobs:
         run: |
           docker push ${REGISTRY}/${IMAGE_NAME}:latest
           docker push ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
-          docker push ${REGISTRY}/${IMAGE_NAME}:${VERSION}
+          docker push ${REGISTRY}/${IMAGE_NAME}:${{ steps.sanitize.outputs.version }}
 
       - name: Extract image digest
         id: digest
