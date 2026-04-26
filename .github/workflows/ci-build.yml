@@ -129,7 +129,7 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true    
-:
+
       # Optional: Generate a full JSON report from Trivy for manual analysis, and print it to the console. This can be useful for debugging or for keeping a record of the scan results.                
       - name: Trivy Full JSON Report (for manual analysis)
         run: |
