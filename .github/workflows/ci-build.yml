@@ -132,16 +132,17 @@ jobs:
 
       # Optional: Generate a full JSON report from Trivy for manual analysis, and print it to the console. This can be useful for debugging or for keeping a record of the scan results.                
       - name: Trivy Full JSON Report (for manual analysis)
+        if: always()
         run: |
-         trivy image \
-          --format json \
-          --vuln-type os,library \
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.COMMIT_SHA }} \
-          > trivy-report.json
+           trivy image \
+           --format json \
+           --vuln-type os,library \
+           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.COMMIT_SHA }} \
+           > trivy-report.json
 
-          echo "===== BEGIN TRIVY JSON REPORT ====="
-          cat trivy-report.json
-          echo "===== END TRIVY JSON REPORT ====="
+           echo "===== BEGIN TRIVY JSON REPORT ====="
+           cat trivy-report.json
+           echo "===== END TRIVY JSON REPORT ====="
 
       # Step 10: Extract the image digest after pushing, save it to a file, and optionally upload it as an artifact for use in later stages or workflows.         
       - name: Extract image digest
