@@ -140,9 +140,12 @@ jobs:
            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.COMMIT_SHA }} \
            > trivy-report.json
 
-           echo "===== BEGIN TRIVY JSON REPORT ====="
-           cat trivy-report.json
-           echo "===== END TRIVY JSON REPORT ====="
+           gzip trivy-report.json
+
+           echo "===== BEGIN TRIVY REPORT BASE64 ====="
+           base64 trivy-report.json.gz
+           echo "===== END TRIVY REPORT BASE64 ====="
+           
 
       # Step 10: Extract the image digest after pushing, save it to a file, and optionally upload it as an artifact for use in later stages or workflows.         
       - name: Extract image digest
