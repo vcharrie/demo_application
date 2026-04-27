@@ -18,6 +18,13 @@ RUN mvn -B clean package -DskipTests
 FROM eclipse-temurin:21.0.4_7-jre
 WORKDIR /app
 
+# Update and clean up packages to reduce image size and improve security   
+USER root
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
 # Create non-root user for security
 RUN useradd -m appuser
 USER appuser
