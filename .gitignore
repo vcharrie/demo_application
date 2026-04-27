@@ -35,3 +35,4 @@ build/
 ### export trivy files ###
 config/trivy/vulnerabilities.csv
 config/trivy/trivy-report.json
+config/trivy/trivy-report.json.gz.b64
