@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ### export trivy files ###
-./config/trivy/vulnerabilities.csv
-./config/trivy/trivy-report.json
+config/trivy/vulnerabilities.csv
+config/trivy/trivy-report.json
