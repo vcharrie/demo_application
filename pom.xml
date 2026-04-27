@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.11</version>
+        <version>3.4.5</version>
     </parent>
 	<groupId>com.coreservice</groupId>
 	<artifactId>CoreServiceApplication</artifactId>
@@ -232,6 +232,11 @@
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-el</artifactId>
             <version>10.1.54</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>6.5.9</version>
         </dependency>
     </dependencies>
 </dependencyManagement>
