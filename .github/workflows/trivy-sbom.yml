@@ -49,6 +49,9 @@ jobs:
          --format cyclonedx \
          --output sbom.cdx
 
+      - name: List files
+        run: ls -al .         
+
 #      - name: Upload SBOM
 #        uses: actions/upload-artifact@v4
 #        with:
