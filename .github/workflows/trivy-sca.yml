@@ -1,0 +1,67 @@
+name: Trivy SCA
+
+on:
+  pull_request:
+    paths:
+      - "pom.xml"
+      - "**/pom.xml"
+      - ".github/workflows/trivy-sca.yml"
+      - "config/trivy/**"
+
+jobs:
+  trivy-sca:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-
+
+      - name: Install dependencies (no tests)
+        run: mvn -B -q dependency:resolve dependency:resolve-plugins
+
+      - name: Trivy SCA - Scan Maven Dependencies
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          format: json
+          output: trivy-sca-report.json
+          severity: HIGH,CRITICAL
+
+      - name: Convert JSON report to HTML
+        run: |
+          trivy convert --format template \
+            --template "@contrib/html.tpl" \
+            --input trivy-sca-report.json \
+            --output trivy-sca-report.html
+
+#      - name: Upload SCA Reports
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: trivy-sca-reports
+#          path: |
+#            trivy-sca-report.json
+#            trivy-sca-report.html
+
+      - name: Fail on High/Critical CVEs (CVSS ≥ 7)
+        run: |
+          CRITICALS=$(jq '.Results[].Vulnerabilities[] | select(.Severity=="CRITICAL" or .Severity=="HIGH")' trivy-sca-report.json | wc -l)
+          if [ "$CRITICALS" -gt 0 ]; then
+            echo "High/Critical vulnerabilities detected: $CRITICALS"
+            exit 1
+          fi
+          echo "No blocking vulnerabilities detected."
