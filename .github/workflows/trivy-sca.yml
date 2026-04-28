@@ -35,7 +35,7 @@ jobs:
         run: mvn -B -q dependency:resolve dependency:resolve-plugins
 
       - name: Trivy SCA - Scan Maven Dependencies
-        uses: aquasecurity/trivy-action@0.19.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
