@@ -49,8 +49,10 @@ jobs:
          --format cyclonedx \
          --output sbom.cdx
 
-      - name: List files
-        run: ls -al .         
+      - name: Print SBOM in Base64
+        run: |
+         echo "SBOM (base64):"
+         base64 sbom.cdx         
 
 #      - name: Upload SBOM
 #        uses: actions/upload-artifact@v4
