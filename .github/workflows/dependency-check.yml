@@ -1,0 +1,49 @@
+name: OWASP Dependency Check
+
+on:
+# Trigger the workflow on pull requests that modify the pom.xml or the workflow configuration    
+  pull_request:
+    paths:
+      - "pom.xml"
+      - ".github/workflows/dependency-check.yml"
+      - "config/owasp/**"
+  workflow_dispatch:
+
+jobs:
+  # Run OWASP Dependency Check on the project  
+  dependency-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+
+      # Install OWASP Dependency Check CLI    
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@v3
+        with:
+          project: "CoreService"
+          path: "."
+          format: "ALL"
+          suppressionFile: "config/owasp/dependency-check-suppressions.xml"
+          failOnCVSS: "7"
+
+#      - name: Upload report
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: dependency-check-report
+#          path: |
+#            dependency-check-report.html
+#            dependency-check-report.xml
