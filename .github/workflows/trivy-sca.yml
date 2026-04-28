@@ -46,10 +46,11 @@ jobs:
 
       - name: Convert JSON report to HTML
         run: |
-          trivy convert --format template \
-            --template "@contrib/html.tpl" \
-            --input trivy-sca-report.json \
-            --output trivy-sca-report.html
+          trivy convert \
+          --format template \
+          --template "@contrib/html.tpl" \
+          --output trivy-sca-report.html \
+          trivy-sca-report.json
 
 #      - name: Upload SCA Reports
 #        uses: actions/upload-artifact@v4
