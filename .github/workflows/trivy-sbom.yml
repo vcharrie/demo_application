@@ -34,13 +34,18 @@ jobs:
       - name: Install dependencies (no tests)
         run: mvn -B -q dependency:resolve dependency:resolve-plugins
 
+      - name: Install Trivy
+        run: |
+         sudo apt-get update
+         sudo apt-get install -y wget
+         wget https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_Linux-64bit.deb
+         sudo dpkg -i trivy_0.70.0_Linux-64bit.deb
+
       - name: Generate SBOM (CycloneDX)
-        uses: aquasecurity/actions/trivy@v0.36.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: cyclonedx
-          output: sbom.cdx
+        run: |
+         trivy fs . \
+         --format cyclonedx \
+         --output sbom.cdx
 
 #      - name: Upload SBOM
 #        uses: actions/upload-artifact@v4
