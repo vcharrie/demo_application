@@ -35,9 +35,10 @@ jobs:
         run: mvn -B -q dependency:resolve dependency:resolve-plugins
 
       - name: Generate SBOM (CycloneDX)
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/actions/trivy@v0.36.0
         with:
-          input: .
+          scan-type: fs
+          scan-ref: .
           format: cyclonedx
           output: sbom.cdx
 
