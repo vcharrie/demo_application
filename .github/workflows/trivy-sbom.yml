@@ -46,6 +46,7 @@ jobs:
       - name: Generate SBOM (CycloneDX)
         run: |
          trivy fs . \
+         --scanners vuln \         
          --format cyclonedx \
          --output sbom.cdx
 
