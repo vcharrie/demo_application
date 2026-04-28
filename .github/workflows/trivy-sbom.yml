@@ -37,8 +37,7 @@ jobs:
       - name: Generate SBOM (CycloneDX)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          command: fs
-          scan-ref: .
+          input: .
           format: cyclonedx
           output: sbom.cdx
 
