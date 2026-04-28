@@ -1,7 +1,9 @@
 name: OWASP Dependency Check
 
 on:
-# Trigger the workflow on pull requests that modify the pom.xml or the workflow configuration    
+  push:
+    branches: [ "feature/v3/issue-55-security-scans" ]
+  # Trigger the workflow on pull requests that modify the pom.xml or the workflow configuration    
   pull_request:
     paths:
       - "pom.xml"
