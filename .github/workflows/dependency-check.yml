@@ -33,14 +33,19 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
 
       # Install OWASP Dependency Check CLI    
-      - name: Run OWASP Dependency Check
-        uses: advanced-security/owasp-dependency-check-action@v1
-        with:
-         project: "CoreService"
-         path: "."
-         format: "ALL"
-         suppression-file: "config/owasp/dependency-check-suppressions.xml"
-         fail-on-cvss: 7
+      - name: Run OWASP Dependency Check (Docker)
+        run: |
+         docker run --rm \
+         -v ${{ github.workspace }}:/src \
+         -v ${{ github.workspace }}/odc-data:/usr/share/dependency-check/data \
+         -v ${{ github.workspace }}/odc-reports:/report \
+         owasp/dependency-check:latest \
+          --project "CoreService" \
+          --scan /src \
+          --format "ALL" \
+          --out /report \
+          --suppression /src/config/owasp/dependency-check-suppressions.xml \
+          --failOnCVSS 7
 
 #      - name: Upload report
 #        uses: actions/upload-artifact@v4
