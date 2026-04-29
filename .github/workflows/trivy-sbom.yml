@@ -43,12 +43,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
 
-      - name: Generate SBOM (CycloneDX)
+      - name: Generate SBOM (CycloneDX, fail on HIGH/CRITICAL)
         run: |
-         trivy fs . \
-         --scanners vuln \
-         --format cyclonedx \
-         --output sbom.cdx
+          trivy fs . \
+            --scanners vuln \
+            --format cyclonedx \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed=true \
+            --exit-code 1 \
+            --output sbom.cdx
 
       - name: Print SBOM in Base64
         run: |
