@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies (no tests)
         run: mvn -B -q dependency:resolve dependency:resolve-plugins
 
+      - name: Generate SBOM (CycloneDX via Maven)
+        run: mvn -B org.cyclonedx:cyclonedx-maven-plugin:2.7.9:makeAggregateBom
+
       - name: Install Trivy
         run: |
           sudo apt-get update
@@ -43,23 +46,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
 
-      - name: Generate SBOM (CycloneDX, fail on HIGH/CRITICAL)
+      - name: Scan SBOM with Trivy (fail on HIGH/CRITICAL)
         run: |
-          trivy fs . \
-            --scanners vuln \
-            --format cyclonedx \
+          trivy sbom \
             --severity HIGH,CRITICAL \
-            --ignore-unfixed=true \
+            --ignore-unfixed=false \
             --exit-code 1 \
-            --output sbom.cdx
+            --format table \
+            target/bom.json
 
       - name: Print SBOM in Base64
         run: |
-         echo "SBOM (base64):"
-         base64 sbom.cdx         
-
-#      - name: Upload SBOM
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: trivy-sbom-cyclonedx
-#          path: sbom.cdx
+          echo "SBOM (base64):"
+          base64 target/bom.json
