@@ -50,7 +50,7 @@ jobs:
         run: |
           trivy sbom \
             --severity HIGH,CRITICAL \
-            --ignorefile .trivyignore
+            --ignorefile "config/trivy/trivyignore"
             --ignore-unfixed=false \
             --exit-code 1 \
             --format table \
