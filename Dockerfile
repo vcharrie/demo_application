@@ -43,6 +43,9 @@ LABEL org.opencontainers.image.created=$BUILD_DATE \
 # Copy the built JAR
 COPY --from=build /app/target/*.jar app.jar
 
+# Activation du profil CI/CD
+ENV SPRING_PROFILES_ACTIVE=ci
+
 EXPOSE 8080
 
 # Healthcheck (optional but recommended)
