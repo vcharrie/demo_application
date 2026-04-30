@@ -1,0 +1,62 @@
+name: Trivy SBOM (CycloneDX)
+
+on:
+  push:
+  pull_request:
+    paths:
+      - "pom.xml"
+      - "**/pom.xml"
+      - "src/**"
+      - ".github/workflows/trivy-sbom.yml"
+      - "config/trivy/**"
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-
+
+      - name: Install dependencies (no tests)
+        run: mvn -B -q dependency:resolve dependency:resolve-plugins
+
+      - name: Generate SBOM (CycloneDX via Maven)
+        run: mvn -B org.cyclonedx:cyclonedx-maven-plugin:2.7.9:makeAggregateBom
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Scan SBOM with Trivy (fail on HIGH/CRITICAL)
+        run: |
+          trivy sbom \
+            --severity HIGH,CRITICAL \
+            --ignorefile "config/trivy/.trivyignore" \
+            --ignore-unfixed=false \
+            --exit-code 1 \
+            --format table \
+            target/bom.json
+
+      - name: Print SBOM in Base64
+        run: |
+          echo "SBOM (base64):"
+          base64 target/bom.json
