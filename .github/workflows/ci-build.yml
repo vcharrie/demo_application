@@ -152,17 +152,30 @@ jobs:
       COMMIT_SHA: ${{ github.sha }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5        
+
+        # ---------------- Install Trivy CLI ----------------
+      - name: Install Trivy CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.69.1/trivy_0.69.1_Linux-64bit.deb
+          sudo dpkg -i trivy_0.69.1_Linux-64bit.deb
+
+      # ---------------- Scan image ----------------
       - name: Trivy Image Scan
-        uses: aquasecurity/actions/trivys@6fb20c8edd70745d6b34bff0387b53b03c8a760a
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.COMMIT_SHA }}
-          format: json
-          output: trivy-image-report.json
-          exit-code: 1
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          ignore-unfixed: true
-          args: --ignorefile config/trivy/.trivyignore.yaml
+        run: |
+          trivy image \
+            --format json \
+            --output trivy-image-report.json \
+            --exit-code 1 \
+            --vuln-type os,library \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed=true \
+            --ignorefile config/trivy/.trivyignore.yaml \
+            $REGISTRY/$IMAGE_NAME:$COMMIT_SHA
+
 
       - name: Hash Trivy image report
         run: |
