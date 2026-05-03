@@ -168,16 +168,15 @@ jobs:
       # ---------------- Scan image ----------------
       - name: Trivy Image Scan
         run: |
-          trivy image \
-            --format json \
-            --output trivy-image-report.json \
-            --exit-code 1 \
-            --vuln-type os,library \
-            --severity CRITICAL,HIGH \
-            --ignore-unfixed=true \
-            --ignorefile config/trivy/.trivyignore.yaml \
-            $REGISTRY/$IMAGE_NAME:$COMMIT_SHA
-
+         trivy image \
+         --format json \
+         --output trivy-image-report.json \
+         --exit-code 1 \
+         --pkg-types os,library \
+         --severity CRITICAL,HIGH \
+         --ignore-unfixed=true \
+         --ignorefile config/trivy/.trivyignore \
+         $REGISTRY/$IMAGE_NAME:$COMMIT_SHA
 
       - name: Hash Trivy image report
         run: |
