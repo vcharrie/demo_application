@@ -4,6 +4,9 @@ env:
   ARTIFACT_RETENTION_DAYS: 2
 
 on:
+  push:
+    branches:
+      - v3_dev  
   pull_request:
 
 jobs:
