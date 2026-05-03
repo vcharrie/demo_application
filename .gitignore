@@ -32,7 +32,35 @@ build/
 ### VS Code ###
 .vscode/
 
-### export trivy files ###
-config/trivy/vulnerabilities.csv
-config/trivy/trivy-report.json
-config/trivy/trivy-report.json.gz.b64
+# ---------------------------------------------------------
+# CI/CD — NEVER VERSION THESE ARTIFACTS
+# ---------------------------------------------------------
+
+# Maven build output
+target/
+
+# SBOMs (CycloneDX, Trivy)
+bom.json
+*.cdx.json
+sbom-*.json
+
+# Trivy reports (filesystem, image, sbom)
+trivy-*.json
+trivy-*.txt
+trivy-*.html
+*.b64
+*.cdx
+*.csv
+
+# Metadata & provenance
+metadata.txt
+provenance.txt
+*.sha256
+*.sig
+
+# Docker build leftovers
+*.tar
+*.oci
+
+# GitHub Actions temporary files
+*.log
