@@ -153,7 +153,7 @@ jobs:
 
     steps:
       - name: Trivy Image Scan
-        uses: aquasecurity/actions/trivy@v6fb20c8edd70745d6b34bff0387b53b03c8a760a
+        uses: aquasecurity/trivy@v6fb20c8edd70745d6b34bff0387b53b03c8a760a
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.COMMIT_SHA }}
           format: json
