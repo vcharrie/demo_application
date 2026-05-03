@@ -89,7 +89,7 @@ jobs:
         run: |
           trivy sbom \
             --severity HIGH,CRITICAL \
-            --ignorefile "config/trivy/.trivyignore" \
+            --ignorefile config/trivy/.trivyignore \
             --ignore-unfixed=false \
             --exit-code 1 \
             --format json \
