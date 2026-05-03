@@ -156,12 +156,14 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5        
 
         # ---------------- Install Trivy CLI ----------------
-      - name: Install Trivy CLI
+      - name: Install Trivy (APT secure repo)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.69.1/trivy_0.69.1_Linux-64bit.deb
-          sudo dpkg -i trivy_0.69.1_Linux-64bit.deb
+         sudo apt-get update
+         sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+         wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+         echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+         sudo apt-get update
+         sudo apt-get install -y trivy
 
       # ---------------- Scan image ----------------
       - name: Trivy Image Scan
