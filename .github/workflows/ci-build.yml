@@ -5,8 +5,8 @@ env:
 
 on:
   push:
-    branches:
-      - v3_dev  
+    #branches:
+    #  - v3_dev  
   pull_request:
 
 jobs:
