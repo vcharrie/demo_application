@@ -108,13 +108,14 @@ jobs:
     permissions:
      contents: read
      actions: read
+     packages: write
     
     runs-on: ubuntu-latest
     needs: sast
 
     env:
       IMAGE_NAME: coreservice
-      REGISTRY: ghcr.io/${{ secrets.GHCR_USERNAME }}
+      REGISTRY: ghcr.io/${{ secrets.GHCR_TOKEN }}
       VERSION: ${{ github.ref_name || 'unknown' }}
       COMMIT_SHA: ${{ github.sha }}
 
@@ -198,7 +199,7 @@ jobs:
       actions: read
 
     runs-on: ubuntu-latest
-    needs: image-build
+    needs: image-scan
 
     env:
       IMAGE_NAME: coreservice
@@ -213,7 +214,7 @@ jobs:
         run: echo "$TOKEN" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
 
       - name: Pull image non validée
-        run: docker pull ghcr.io/${{ secrets.GHCR_USERNAME }}/coreservice:${GITHUB_SHA}-unscanned
+        run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned
 
       - name: Re-tag en image validée
         run: |
