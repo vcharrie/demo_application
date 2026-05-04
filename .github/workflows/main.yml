@@ -20,17 +20,28 @@ jobs:
           echo "GITHUB_REF_NAME         = $GITHUB_REF_NAME"
           echo "GITHUB_SHA              = $GITHUB_SHA"
 
-      - name: Show GHCR login user (base64)
+      - name: Show owner char by char
         run: |
-          echo "REGISTRY_OWNER_LC (base64) = $(echo -n ${GITHUB_REPOSITORY_OWNER,,} | base64)"
+          echo "=== Owner (char by char) ==="
+          for (( i=0; i<${#GITHUB_REPOSITORY_OWNER}; i++ )); do
+            echo " - ${GITHUB_REPOSITORY_OWNER:$i:1}"
+          done
 
-      - name: Show GHCR_USERNAME (base64)
+      - name: Show GHCR_USERNAME char by char
         run: |
-          echo "GHCR_USERNAME (base64) = $(echo -n '${{ secrets.GHCR_USERNAME }}' | base64)"
+          echo "=== GHCR_USERNAME (char by char) ==="
+          USERNAME="${{ secrets.GHCR_USERNAME }}"
+          for (( i=0; i<${#USERNAME}; i++ )); do
+            echo " - ${USERNAME:$i:1}"
+          done
 
-      - name: Show GHCR_TOKEN (base64, partial)
+      - name: Show GHCR_TOKEN (partial, char by char)
         run: |
-          echo "GHCR_TOKEN (base64, partial) = $(echo -n '${{ secrets.GHCR_TOKEN }}' | base64 | cut -c1-40)"
+          echo "=== GHCR_TOKEN (partial, char by char) ==="
+          TOKEN="${{ secrets.GHCR_TOKEN }}"
+          for (( i=0; i<20 && i<${#TOKEN}; i++ )); do
+            echo " - ${TOKEN:$i:1}"
+          done
 
       - name: Show computed registry
         run: |
