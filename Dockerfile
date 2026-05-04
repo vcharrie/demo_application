@@ -17,12 +17,6 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}"
 
 WORKDIR /app
 
-# Mises à jour sécurité OS — sans curl, sans recommandations inutiles
-RUN apt-get update \
- && apt-get upgrade -y --no-install-recommends \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
 # Utilisateur non-root — UID/GID fixes, pas de home, pas de shell
 RUN groupadd --gid 10001 appgroup \
  && useradd --uid 10001 --gid appgroup \

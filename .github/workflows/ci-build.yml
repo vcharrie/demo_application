@@ -122,6 +122,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
+      - name: Build with Maven
+        run: mvn -B clean package -DskipTests=false
+
       - name: Normalize registry owner (lowercase)
         run: echo "REGISTRY_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
