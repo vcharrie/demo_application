@@ -154,7 +154,17 @@ jobs:
       contents: read
       packages: read
 
+    env:
+      IMAGE_NAME: coreservice
+      VERSION: ${{ github.ref_name || 'unknown' }}
+      COMMIT_SHA: ${{ github.sha }}
+
     steps:
+      - name: Normalize registry owner (lowercase)
+        run: echo "REGISTRY_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+      - name: Set REGISTRY
+        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         env:
@@ -211,7 +221,6 @@ jobs:
 
     env:
       IMAGE_NAME: coreservice
-      REGISTRY: ghcr.io/${{ secrets.GHCR_USERNAME }}
       VERSION: ${{ github.ref_name || 'unknown' }}
       COMMIT_SHA: ${{ github.sha }}
 
@@ -220,6 +229,12 @@ jobs:
         env:
           TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: echo "$TOKEN" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+      - name: Normalize registry owner (lowercase)
+        run: echo "REGISTRY_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+      - name: Set REGISTRY
+        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER}" >> $GITHUB_ENV
 
       - name: Pull image non validée
         run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned
