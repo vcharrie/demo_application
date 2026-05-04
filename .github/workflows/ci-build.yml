@@ -115,7 +115,6 @@ jobs:
 
     env:
       IMAGE_NAME: coreservice
-      REGISTRY: ghcr.io/${{ secrets.GHCR_TOKEN }}
       VERSION: ${{ github.ref_name || 'unknown' }}
       COMMIT_SHA: ${{ github.sha }}
 
@@ -123,16 +122,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
+      - name: Normalize registry owner (lowercase)
+        run: echo "REGISTRY_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+      - name: Set REGISTRY
+        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER}" >> $GITHUB_ENV        
+
       - name: Build Docker image
         run: |
           docker build \
             --build-arg BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
             --build-arg VCS_REF="${COMMIT_SHA}" \
             --build-arg VERSION="${VERSION}" \
-            -t ${REGISTRY}/${IMAGE_NAME}:latest \
             -t ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned \
-            -t ${REGISTRY}/${IMAGE_NAME}:${VERSION} \
             .
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: echo "$TOKEN" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
       - name: Push image non validée
         run: docker push ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned
 
