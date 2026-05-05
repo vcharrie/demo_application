@@ -143,7 +143,7 @@ jobs:
             --build-arg BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
             --build-arg VCS_REF="${COMMIT_SHA}" \
             --build-arg VERSION="${VERSION}" \
-            -t ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned \
+            -t ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA} \
             .
       - name: Log in to GHCR
         env:
