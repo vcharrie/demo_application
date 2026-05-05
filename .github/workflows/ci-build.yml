@@ -170,15 +170,15 @@ jobs:
 
     steps:
       - name: Normalize registry owner (lowercase)
-        run: echo "REGISTRY_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+        run: echo "REGISTRY_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
       - name: Set REGISTRY
-        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER}" >> $GITHUB_ENV
+        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER_LC}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         env:
           TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: echo "$TOKEN" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+        run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
 
       - name: Pull unscanned image
         run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned  
@@ -240,13 +240,13 @@ jobs:
       - name: Log in to GHCR
         env:
           TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: echo "$TOKEN" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+        run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
 
       - name: Normalize registry owner (lowercase)
-        run: echo "REGISTRY_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+        run: echo "REGISTRY_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
       - name: Set REGISTRY
-        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER}" >> $GITHUB_ENV
+        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER_LC}" >> $GITHUB_ENV
 
       - name: Pull image non validée
         run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned
@@ -324,14 +324,20 @@ jobs:
 
     env:
       IMAGE_NAME: coreservice
-      REGISTRY: ghcr.io/${{ secrets.GHCR_USERNAME }}
+      VERSION: ${{ github.ref_name || 'unknown' }}
       COMMIT_SHA: ${{ github.sha }}
 
     steps:
       - name: Log in to GHCR
         env:
           TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: echo "$TOKEN" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+        run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
+
+      - name: Normalize registry owner (lowercase)
+        run: echo "REGISTRY_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+      - name: Set REGISTRY
+        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER_LC}" >> $GITHUB_ENV
 
       - name: Pull Docker image
         run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
@@ -347,3 +353,45 @@ jobs:
       - name: Stop container
         if: always()
         run: docker stop coreservice
+
+  cleanup:
+     needs: [build, sast, image-build, image-scan, publish, deploy]
+     if: always()
+     runs-on: ubuntu-latest
+
+     steps:
+      - name: Normalize registry owner (lowercase)
+        run: echo "REGISTRY_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+
+      - name: Set REGISTRY
+        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
+
+      - name: Cleanup images based on workflow result
+        run: |
+         echo "Build result: ${{ needs.build.result }}"
+         echo "Sast result: ${{ needs.sast.result }}"
+         echo "Sast result: ${{ needs.image-build.result }}"
+         echo "Sast result: ${{ needs.image-scan.result }}"
+         echo "Publish result: ${{ needs.publish.result }}"
+
+         # Si un job a échoué → workflow KO
+         if [ "${{ needs.build.result }}" != "success" ] || \
+         [ "${{ needs.sast.result }}" != "success" ] || \
+         [ "${{ needs.image-build.result }}" != "success" ] || \
+         [ "${{ needs.image-scan.result }}" != "success" ] || \  
+         [ "${{ needs.publish.result }}" != "success" ]; then
+
+         echo "Workflow FAILED → deleting all temporary images"
+         docker rmi ghcr.io/${REGISTRY_OWNER}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned || true
+         docker rmi ghcr.io/${REGISTRY_OWNER}/${IMAGE_NAME}:${COMMIT_SHA} || true
+         exit 0
+         fi
+
+         # Sinon → workflow OK
+         echo "Workflow SUCCESS → deleting only -unscanned tag"
+         docker rmi ghcr.io/${REGISTRY_OWNER}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned || true
