@@ -262,6 +262,19 @@ jobs:
         run: |
           docker push ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
 
+    # ---------------------------------------------------------
+    # AJOUT : rendre l’image visible dans GHCR (tag latest)
+    # ---------------------------------------------------------
+      - name: Tag as latest (visible in GHCR UI)
+        run: |
+         docker tag \
+           ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA} \
+           ${REGISTRY}/${IMAGE_NAME}:latest
+
+      - name: Push latest tag
+        run: |
+         docker push ${REGISTRY}/${IMAGE_NAME}:latest
+
       - name: Capture image digest
         run: |
          IMAGE_REF=${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
@@ -286,7 +299,6 @@ jobs:
          path: | 
            metadata.txt
            metadata.txt.sha256
-         
 
   # ---------------------------------------------------------
   # 6. DEPLOY — smoke test (variables Docker ici uniquement)
