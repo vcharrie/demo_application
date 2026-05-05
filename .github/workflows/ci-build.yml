@@ -151,7 +151,7 @@ jobs:
         run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
 
       - name: Push image non validée
-        run: docker push ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned
+        run: docker push ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
 
   # ---------------------------------------------------------
   # JOB 2 — IMAGE SCAN — Trivy image
@@ -181,7 +181,7 @@ jobs:
         run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
 
       - name: Pull unscanned image
-        run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned  
+        run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}  
     
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -205,7 +205,7 @@ jobs:
             --severity CRITICAL,HIGH \
             --ignore-unfixed=true \
             --ignorefile config/trivy/.trivyignore \
-            $REGISTRY/$IMAGE_NAME:$COMMIT_SHA-unscanned
+            $REGISTRY/$IMAGE_NAME:$COMMIT_SHA
 
       - name: Hash Trivy image report
         run: sha256sum trivy-image-report.json > trivy-image-report.json.sha256
@@ -249,42 +249,8 @@ jobs:
           TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
 
-      - name: Pull image non validée
-        run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned
-
-      - name: Re-tag en image validée
-        run: |
-          docker tag \
-          ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned \
-          ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
-
-
-      - name: Push Docker images
-        run: |
-          docker push ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
-
-    # ---------------------------------------------------------
-    # AJOUT : rendre l’image visible dans GHCR (tag latest)
-    # ---------------------------------------------------------
-      - name: Tag as latest (visible in GHCR UI)
-        run: |
-         docker tag \
-           ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA} \
-           ${REGISTRY}/${IMAGE_NAME}:latest
-
-      - name: Debug REGISTRY (split + base64)
-        run: |
-          REG="${REGISTRY}"
-          # split into chunks of 2 chars
-          for ((i=0; i<${#REG}; i+=2)); do
-           chunk="${REG:$i:2}"
-           echo -n "$chunk" | base64
-           echo ""
-          done
-
-      - name: Push latest tag
-        run: |
-         docker push ${REGISTRY}/${IMAGE_NAME}:latest
+      - name: Pull image
+        run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
 
       - name: Capture image digest
         run: |
@@ -388,12 +354,11 @@ jobs:
          [ "${{ needs.image-scan.result }}" != "success" ] || \  
          [ "${{ needs.publish.result }}" != "success" ]; then
 
-         echo "Workflow FAILED → deleting all temporary images"
-         docker rmi ghcr.io/${REGISTRY_OWNER}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned || true
+         echo "Workflow FAILED → delete image"
          docker rmi ghcr.io/${REGISTRY_OWNER}/${IMAGE_NAME}:${COMMIT_SHA} || true
          exit 0
          fi
 
          # Sinon → workflow OK
-         echo "Workflow SUCCESS → deleting only -unscanned tag"
-         docker rmi ghcr.io/${REGISTRY_OWNER}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned || true
+         echo "Workflow SUCCESS"
+         
