@@ -237,16 +237,17 @@ jobs:
       COMMIT_SHA: ${{ github.sha }}
 
     steps:
-      - name: Log in to GHCR
-        env:
-          TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
-
+ 
       - name: Normalize registry owner (lowercase)
         run: echo "REGISTRY_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
       - name: Set REGISTRY
         run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER_LC}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
 
       - name: Pull image non validée
         run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}-unscanned
@@ -328,16 +329,17 @@ jobs:
       COMMIT_SHA: ${{ github.sha }}
 
     steps:
-      - name: Log in to GHCR
-        env:
-          TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
-
+ 
       - name: Normalize registry owner (lowercase)
         run: echo "REGISTRY_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
       - name: Set REGISTRY
         run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER_LC}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
 
       - name: Pull Docker image
         run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
@@ -361,10 +363,10 @@ jobs:
 
      steps:
       - name: Normalize registry owner (lowercase)
-        run: echo "REGISTRY_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+        run: echo "REGISTRY_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
 
       - name: Set REGISTRY
-        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER}" >> $GITHUB_ENV
+        run: echo "REGISTRY=ghcr.io/${REGISTRY_OWNER_LC}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         env:
