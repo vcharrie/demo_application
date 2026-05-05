@@ -271,6 +271,14 @@ jobs:
            ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA} \
            ${REGISTRY}/${IMAGE_NAME}:latest
 
+      - name: Debug REGISTRY (char by char)
+        run: |
+         REG="${REGISTRY}"
+         for ((i=0; i<${#REG}; i++)); do
+          printf "%s" "${REG:$i:1}"
+          done
+          printf "\n"
+
       - name: Push latest tag
         run: |
          docker push ${REGISTRY}/${IMAGE_NAME}:latest
