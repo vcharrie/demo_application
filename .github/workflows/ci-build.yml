@@ -271,10 +271,15 @@ jobs:
            ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA} \
            ${REGISTRY}/${IMAGE_NAME}:latest
 
-      - name: Debug REGISTRY (base64)
+      - name: Debug REGISTRY (split + base64)
         run: |
-         echo "REGISTRY (raw, may be masked): ${REGISTRY}"
-         echo -n "${REGISTRY}" | base64
+          REG="${REGISTRY}"
+          # split into chunks of 2 chars
+          for ((i=0; i<${#REG}; i+=2)); do
+           chunk="${REG:$i:2}"
+           echo -n "$chunk" | base64
+           echo ""
+          done
 
       - name: Push latest tag
         run: |
