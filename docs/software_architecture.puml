@@ -1,0 +1,74 @@
+@startuml
+title CoreService – Software & CI/CD v3
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam packageStyle rectangle
+skinparam dpi 150
+
+left to right direction
+
+package "Software Architecture\n(Technical Dependencies)" {
+  package "API Layer" {
+    rectangle "Spring Web"
+    rectangle "Jakarta Validation"
+    rectangle "🆕 Secure Logging Rules"
+  }
+
+  package "Service Layer" {
+    rectangle "Business Logic"
+  }
+
+  package "Domain Layer" {
+    rectangle "Pure Java Model"
+  }
+
+  package "Infrastructure Layer" {
+    rectangle "Spring Data JPA"
+    rectangle "H2 Database"
+  }
+
+  package "Tools" {
+    rectangle "Maven"
+    rectangle "Docker"
+    rectangle "JIB Plugin"
+    rectangle "GitHub Actions"
+    rectangle "🆕 CodeQL (SAST)"
+    rectangle "🆕 OWASP Dependency Check (SCA)"
+    rectangle "🆕 Trivy (Container Scan)"
+    rectangle "🆕 Non-root Docker Execution"
+    rectangle "🆕 OCI Labels"
+  }
+}
+
+package "System Architecture\n(CI/CD Pipeline v3)" {
+  actor Dev as "Developer"
+  Dev --> "GitHub Repository\n(core-service)"
+
+  package "CI Pipeline" {
+    rectangle "🆕 Security Stage:\n- CodeQL (SAST)\n- Dependency Check (SCA)\n- Fail on critical vulnerabilities"
+    rectangle "Build Stage:\nMaven clean verify"
+    rectangle "Test Stage:\nUnit + Integration Tests"
+    rectangle "Docker Build:\nMulti-stage Dockerfile\n🆕 Non-root user\n🆕 OCI labels"
+    rectangle "🆕 Container Scan:\nTrivy\nFail on critical vulnerabilities"
+    rectangle "Smoke Tests"
+  }
+
+  package "Artifacts" {
+    rectangle "🆕 SAST Report"
+    rectangle "🆕 SCA Report"
+    rectangle "🆕 Trivy Report"
+    rectangle "Test Reports"
+  }
+
+  package "Registry" {
+    rectangle "Container Registry\n(e.g., JFrog)"
+  }
+
+  package "Runtime Environment" {
+    rectangle "Docker Host /\nVM /\nCluster"
+  }
+}
+
+@enduml

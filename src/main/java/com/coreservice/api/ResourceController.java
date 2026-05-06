@@ -5,12 +5,16 @@ import com.coreservice.api.dto.ResourceResponse;
 import com.coreservice.api.mapper.ResourceApiMapper;
 import com.coreservice.domain.ResourceService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/resources")
 public class ResourceController {
 
@@ -36,7 +40,10 @@ public class ResourceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResourceResponse> findById(@PathVariable String id) {
+    public ResponseEntity<ResourceResponse> getById(
+        @PathVariable
+        @Pattern(regexp = "^[a-fA-F0-9-]{36}$")
+        String id) {
         var resource = service.findById(id);
         return ResponseEntity.ok(ResourceApiMapper.toResponse(resource));
     }

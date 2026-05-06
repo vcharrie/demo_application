@@ -1,0 +1,57 @@
+@startuml
+title CoreService – Business / Functional / Application (v3)
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam packageStyle rectangle
+skinparam dpi 150
+
+' BUSINESS
+package "Business Architecture" {
+  left to right direction
+
+  actor User
+
+  rectangle "Process 1:\nCreate Resource\n→ returns created Resource" as P1
+  rectangle "Process 2:\nList Resources\n→ returns list" as P2
+  rectangle "Process 3:\nGet Resource by ID\n→ returns Resource or Not Found" as P3
+  rectangle "Process 4:\nDelete Resource\n→ returns confirmation or Not Found" as P4
+
+  User --> P1
+  User --> P2
+  User --> P3
+  User --> P4
+}
+
+' FUNCTIONAL
+package "Functional Architecture" {
+  left to right direction
+
+  rectangle "Create Resource\nInput: name, description\nOutput: Resource"
+  rectangle "List Resources\nInput: none\nOutput: list"
+  rectangle "Get Resource by ID\nInput: id\nOutput: Resource or Not Found"
+  rectangle "Delete Resource\nInput: id\nOutput: confirmation or Not Found"
+
+  rectangle "🆕 Input Validation\n(Functional requirement)"
+  rectangle "🆕 Standardized Error Responses\n(Functional requirement)"
+}
+
+' APPLICATION
+package "Application Architecture (REST)" {
+  left to right direction
+
+  actor ApiUser as "User"
+  rectangle "CoreService API\nREST / JSON" as API
+
+  ApiUser --> API
+
+  API --> "POST /resources\nCreate Resource"
+  API --> "GET /resources\nList Resources"
+  API --> "GET /resources/{id}\nGet Resource"
+  API --> "DELETE /resources/{id}\nDelete Resource"
+
+  rectangle "🆕 Cross-Cutting Behaviors:\n- Centralized validation\n- Centralized error handling\n- Secure logging\n- Fail-fast on missing secrets"
+}
+
+@enduml

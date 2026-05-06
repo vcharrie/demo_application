@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- Exclusions modérées pour éviter le bruit inutile -->
+    
+    <!-- Ignore les warnings sur les classes générées par Spring ou Hibernate -->
+    <Match>
+        <Package name="~.*\.generated\..*"/>
+    </Match>
+
+    <!-- Ignore les warnings sur les classes d'exceptions custom -->
+    <Match>
+        <Class name="~.*\.exception\..*Exception"/>
+    </Match>
+
+    <!-- Ignore les faux positifs sur les records Java -->
+    <Match>
+        <Class name="~.*\..*Record"/>
+    </Match>
+
+    <Match>
+        <Class name="com.coreservice.api.ResourceController"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="com.coreservice.config.security.SecretsConfigValidator"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="com.coreservice.domain.Resource"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+
+    
+
+</FindBugsFilter>

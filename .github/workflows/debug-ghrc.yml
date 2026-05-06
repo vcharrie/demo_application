@@ -1,0 +1,61 @@
+name: Debug GHCR Context
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug-ghcr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show GitHub context
+        run: |
+          echo "=== GitHub Context ==="
+          echo "GITHUB_REPOSITORY_OWNER = $GITHUB_REPOSITORY_OWNER"
+          echo "GITHUB_REPOSITORY       = $GITHUB_REPOSITORY"
+          echo "GITHUB_ACTOR            = $GITHUB_ACTOR"
+          echo "GITHUB_REF_NAME         = $GITHUB_REF_NAME"
+          echo "GITHUB_SHA              = $GITHUB_SHA"
+
+      - name: Normalize registry owner (lowercase)
+        run: |
+          echo "REGISTRY_OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+          echo "REGISTRY_OWNER_LC = ${GITHUB_REPOSITORY_OWNER,,}"
+
+      - name: Compute registry
+        run: |
+          echo "REGISTRY=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+          echo "REGISTRY = ghcr.io/${GITHUB_REPOSITORY_OWNER,,}"
+
+      - name: Show GHCR login info
+        run: |
+          echo "=== GHCR Login Info ==="
+          echo "Docker login user would be: ${GITHUB_REPOSITORY_OWNER,,}"
+          echo "GHCR_USERNAME secret set? -> ${{ secrets.GHCR_USERNAME != '' }}"
+          echo "GHCR_TOKEN secret set?    -> ${{ secrets.GHCR_TOKEN != '' }}"
+
+      - name: Show image naming
+        run: |
+          echo "=== Image Naming ==="
+          echo "IMAGE_NAME = coreservice"
+          echo "TAG        = ${GITHUB_SHA}-unscanned"
+          echo "FULL IMAGE = ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/coreservice:${GITHUB_SHA}-unscanned"
+
+      - name: Show workspace structure
+        run: |
+          echo "=== Workspace Structure ==="
+          pwd
+          ls -R .
+
+      - name: Check target directory
+        run: |
+          echo "=== Checking target/ ==="
+          if [ -d "target" ]; then
+            echo "target/ exists"
+            ls -l target
+          else
+            echo "target/ DOES NOT EXIST"
+          fi
