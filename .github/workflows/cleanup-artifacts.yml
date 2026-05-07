@@ -10,7 +10,7 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ github.GH_PAT }}
+      GH_TOKEN: ${{ secrets.GH_PAT }}
 
     steps:
      
