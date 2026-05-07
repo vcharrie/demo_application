@@ -2,7 +2,7 @@ name: Cleanup old artifacts
 
 on:
   schedule:
-    - cron: "0 3 * * *"   # Tous les jours à 03:00 UTC
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 jobs:
@@ -21,22 +21,26 @@ jobs:
           fi
 
       - name: Fetch all artifacts
-        id: fetch
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           gh api repos/${{ github.repository }}/actions/artifacts --paginate > artifacts.json
 
-          count=$(jq -r '.artifacts | length' artifacts.json)
-
-          # écriture propre dans GITHUB_OUTPUT
-          printf "count=%s\n" "$count" >> "$GITHUB_OUTPUT"
+          # Compter proprement
+          jq -r '.artifacts | length' artifacts.json | tr -d '\n' | tr -d '\r' > count.txt
 
       - name: Process artifacts
-        if: steps.fetch.outputs.count != '0'
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
+          count=$(cat count.txt)
+          echo "Total artifacts: $count"
+
+          if [ "$count" = "0" ]; then
+            echo "Nothing to do."
+            exit 0
+          fi
+
           echo "🔍 Total artifacts: $(jq '.artifacts | length' artifacts.json)"
 
           # 1) IDENTIFIER LES ARTEFACTS DE RELEASE (NE PAS TOUCHER)
