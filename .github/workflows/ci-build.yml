@@ -154,7 +154,7 @@ jobs:
         run: docker push ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
 
   # ---------------------------------------------------------
-  # JOB 2 — IMAGE SCAN — Trivy image
+  # JOB 2 — IMAGE SCAN — Trivy image (stable, single-run)
   # ---------------------------------------------------------
   image-scan:
     runs-on: ubuntu-latest
@@ -181,10 +181,10 @@ jobs:
         run: echo "$TOKEN" | docker login ghcr.io -u "${REGISTRY_OWNER_LC}" --password-stdin
 
       - name: Pull unscanned image
-        run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}  
-    
+        run: docker pull ${REGISTRY}/${IMAGE_NAME}:${COMMIT_SHA}
+
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        uses: actions/checkout@v4
 
       - name: Install Trivy (APT secure repo)
         run: |
@@ -195,29 +195,46 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
 
-      - name: Trivy Image Scan
+      # -------------------------------
+      # 🔥 TRIVY — SINGLE EXECUTION
+      # -------------------------------
+      - name: Trivy Image Scan (single run, capture exit code)
+        id: trivy
         run: |
+          set +e
           trivy image \
             --format json \
             --output trivy-image-report.json \
-            --exit-code 1 \
             --pkg-types os,library \
             --severity CRITICAL,HIGH \
             --ignore-unfixed=true \
             --ignorefile config/trivy/.trivyignore \
             $REGISTRY/$IMAGE_NAME:$COMMIT_SHA
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          set -e
 
       - name: Hash Trivy image report
         run: sha256sum trivy-image-report.json > trivy-image-report.json.sha256
 
       - name: Upload Trivy image scan report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-image-report
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: |
             trivy-image-report.json
             trivy-image-report.json.sha256
+
+      # -------------------------------
+      # 🔥 QUALITY GATE — FAIL AFTER UPLOAD
+      # -------------------------------
+      - name: Fail if vulnerabilities found
+        run: |
+          if [ "${{ steps.trivy.outputs.exit_code }}" != "0" ]; then
+            echo "❌ Trivy found vulnerabilities (HIGH/CRITICAL). Failing job."
+            exit 1
+          fi
+
 
   # ---------------------------------------------------------
   # 5. PUBLISH — push images (variables Docker ici uniquement)
