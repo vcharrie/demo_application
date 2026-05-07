@@ -12,10 +12,19 @@ jobs:
 
 
     steps:
-     
-      - name: Fetch all artifacts
+      - name: Debug GH_TOKEN
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+         if [ -z "$GH_TOKEN" ]; then
+          echo "GH_TOKEN=EMPTY"
+         else
+          echo "GH_TOKEN=SET"
+         fi 
+
+      - name: Fetch all artifacts
+        env:
+         GH_TOKEN: ${{ secrets.GH_PAT }}
         id: fetch
         run: |
           gh api repos/${{ github.repository }}/actions/artifacts --paginate > artifacts.json
