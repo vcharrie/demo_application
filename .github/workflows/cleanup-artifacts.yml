@@ -6,33 +6,36 @@ on:
   workflow_dispatch:
 
 jobs:
-
   cleanup:
     runs-on: ubuntu-latest
-
 
     steps:
       - name: Debug GH_TOKEN
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-         if [ -z "$GH_TOKEN" ]; then
-          echo "GH_TOKEN=EMPTY"
-         else
-          echo "GH_TOKEN=SET"
-         fi 
+          if [ -z "$GH_TOKEN" ]; then
+            echo "GH_TOKEN=EMPTY"
+          else
+            echo "GH_TOKEN=SET"
+          fi
 
       - name: Fetch all artifacts
-        env:
-         GH_TOKEN: ${{ secrets.GH_PAT }}
         id: fetch
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           gh api repos/${{ github.repository }}/actions/artifacts --paginate > artifacts.json
-          count=$(jq '.artifacts | length' artifacts.json)
-          echo "count=$count" >> $GITHUB_OUTPUT
+
+          count=$(jq -r '.artifacts | length' artifacts.json)
+
+          # écriture propre dans GITHUB_OUTPUT
+          printf "count=%s\n" "$count" >> "$GITHUB_OUTPUT"
 
       - name: Process artifacts
         if: steps.fetch.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           echo "🔍 Total artifacts: $(jq '.artifacts | length' artifacts.json)"
 
@@ -43,8 +46,7 @@ jobs:
           echo "$RELEASE_IDS"
 
           # 2) IDENTIFIER LES ARTEFACTS DE MAIN
-          MAIN_ARTIFACTS=$(jq -r '.artifacts[] | select(.workflow_run.head_branch == "main")' artifacts.json)
-          echo "$MAIN_ARTIFACTS" > main.json
+          jq -r '.artifacts[] | select(.workflow_run.head_branch == "main")' artifacts.json > main.json
 
           # Garder les 2 plus récents sur main
           MAIN_KEEP_IDS=$(jq -r 'sort_by(.created_at) | reverse | .[:2] | .[].id' main.json)
@@ -55,12 +57,11 @@ jobs:
           # 3) IDENTIFIER LES ARTEFACTS À SUPPRIMER
           DELETE_IDS=$(jq -r '
             .artifacts[]
-            | select(.workflow_run.event != "release")        # pas les releases
-            | select(.workflow_run.head_branch != "main")     # pas main
+            | select(.workflow_run.event != "release")
+            | select(.workflow_run.head_branch != "main")
             | .id
           ' artifacts.json)
 
-          # Ajouter les artefacts main sauf les 2 derniers
           DELETE_IDS_MAIN=$(jq -r '
             sort_by(.created_at) | reverse | .[2:] | .[].id
           ' main.json)
