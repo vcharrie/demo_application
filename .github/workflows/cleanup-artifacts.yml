@@ -50,7 +50,7 @@ jobs:
           echo "$RELEASE_IDS"
 
           # 2) IDENTIFIER LES ARTEFACTS DE MAIN
-          jq -r '.artifacts[] | select(.workflow_run.head_branch == "main")' artifacts.json > main.json
+          jq -r '[.artifacts[] | select(.workflow_run.head_branch == "main")]' artifacts.json > main.json
 
           # Garder les 2 plus récents sur main
           MAIN_KEEP_IDS=$(jq -r 'sort_by(.created_at) | reverse | .[:2] | .[].id' main.json)
