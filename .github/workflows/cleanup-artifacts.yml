@@ -28,7 +28,8 @@ jobs:
         id: fetch
         run: |
           gh api repos/${{ github.repository }}/actions/artifacts --paginate > artifacts.json
-          echo "count=$(jq '.artifacts | length' artifacts.json)" >> $GITHUB_OUTPUT
+          count=$(jq '.artifacts | length' artifacts.json)
+          echo "count=$count" >> $GITHUB_OUTPUT
 
       - name: Process artifacts
         if: steps.fetch.outputs.count != '0'
