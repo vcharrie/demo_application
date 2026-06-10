@@ -1,0 +1,9 @@
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: coreservice
+          image: ghcr.io/vcharrie/demo_application:a9ba2dfd768b2039595eab3b53cc7172f4b0c1d7
+
+

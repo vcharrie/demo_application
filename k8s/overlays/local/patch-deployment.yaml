@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coreservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: coreservice
+  template:
+    metadata:
+      labels:
+        app: coreservice
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: coreservice
+          image: ghcr.io/vcharrie/coreservice:a9ba2dfd768b2039595eab3b53cc7172f4b0c1d7
+          ports:
+            - containerPort: 8080
+

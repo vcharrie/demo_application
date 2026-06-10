@@ -1,0 +1,40 @@
+@startuml
+title Architecture réseau kind (Windows → Docker → Node → CNI → Pods)
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "Windows Host" {
+  [kubectl]
+  [Navigateur Web]
+}
+
+package "Docker Desktop (VM Linux)" {
+  
+  node "Réseau Docker : kind" as dockerNet {
+    component "Node Kubernetes\n(kind-control-plane)\nContainer Docker" as node
+  }
+}
+
+package "Node Kubernetes : kind-control-plane" {
+  
+  package "CNI (kindnet)\nRéseau interne du cluster" as cni {
+    component "Pod natif\n(kube-proxy)" as kubeproxy
+    component "Pod natif\n(coredns)" as coredns
+    component "Pod infra\n(ingress-nginx-controller)" as ingress
+    component "Pod applicatif\n(coreservice)" as app
+  }
+}
+
+' Relations externes
+[kubectl] --> node : API Server (6443)
+[Navigateur Web] --> node : Ingress HTTP/HTTPS
+
+' Relations internes
+node --> cni : Containerd + CNI
+cni --> kubeproxy
+cni --> coredns
+cni --> ingress
+cni --> app
+
+@enduml

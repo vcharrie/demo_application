@@ -5,8 +5,7 @@ namespace: coreservice
 
 resources:
   - ../../base
-  - sealedsecret-ghcr.yaml
 
 patches:
-  - patch-deployment.yaml
-  - patch-ingress.yaml
+  - path: patch-deployment.yaml
+  - path: patch-ingress.yaml
