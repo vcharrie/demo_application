@@ -16,8 +16,8 @@ public class SecretsConfigValidator implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        validateNotEmpty("token", securityProperties.getToken());
-        validateNotEmpty("salt", securityProperties.getSalt());
+        validateNotEmpty("token", securityProperties.token());
+        validateNotEmpty("salt", securityProperties.salt());
         // Ajoute ici d'autres secrets si nécessaire
     }
 

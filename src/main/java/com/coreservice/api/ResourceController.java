@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @Validated
-@RequestMapping("/resources")
+@RequestMapping("/api/resources")
 public class ResourceController {
 
     private final ResourceService service;

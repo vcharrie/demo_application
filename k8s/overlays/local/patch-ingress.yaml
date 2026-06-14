@@ -2,27 +2,25 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: coreservice
-  namespace: coreservice
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
-  ingressClassName: nginx
   rules:
-  - host: coreservice.localdev.me
-    http:
-      paths:
-      - path: /actuator/health
-        pathType: Prefix
-        backend:
-          service:
-            name: coreservice
-            port:
-              number: 8080
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: coreservice
-            port:
-              number: 8080
+    - host: coreservice.localdev.me
+      http:
+        paths:
+          - path: /actuator/health
+            pathType: Prefix
+            backend:
+              service:
+                name: coreservice
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: coreservice
+                port:
+                  number: 80

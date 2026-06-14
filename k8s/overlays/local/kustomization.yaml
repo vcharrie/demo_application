@@ -4,8 +4,10 @@ kind: Kustomization
 namespace: coreservice
 
 resources:
+  - namespace.yaml
   - ../../base
+  - sealedsecret-ghcr.yaml
 
-patches:
-  - path: patch-deployment.yaml
-  - path: patch-ingress.yaml
+patchesStrategicMerge:
+  - patch-deployment.yaml
+  - patch-ingress.yaml

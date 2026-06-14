@@ -18,13 +18,13 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void shouldReturnNotFound() throws Exception {
-        mockMvc.perform(get("/resources/00000000-0000-0000-0000-000000000000"))
+        mockMvc.perform(get("/api/resources/00000000-0000-0000-0000-000000000000"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldReturnBadRequestForIllegalArgument() throws Exception {
-        mockMvc.perform(get("/resources/invalid-uuid"))
+        mockMvc.perform(get("/api/resources/invalid-uuid"))
                 .andExpect(status().isBadRequest());
     }
 }

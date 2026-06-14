@@ -6,7 +6,7 @@ foreach ($c in $clusters) {
 }
 
 Write-Host "=== Création du cluster kind ==="
-kind create cluster --name coreservice --config k8s/config/kind-config.yaml
+kind create cluster --name coreservice --config config/kind-config.yaml
 
 Write-Host "=== Installation du controller Sealed Secrets ==="
 kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.26.0/controller.yaml
@@ -43,7 +43,7 @@ kubectl wait --namespace ingress-nginx `
   --timeout=120s
 
 Write-Host "=== Déploiement de l'application via Kustomize ==="
-kubectl apply -k k8s/overlays/local
+kubectl apply -k overlays/local
 
 Write-Host "=== Attente des Pods ==="
 kubectl wait --for=condition=ready pod -n coreservice --all --timeout=120s
