@@ -23,52 +23,46 @@ on:
 jobs:
 
   sbom:
-    permissions:
-     contents: read
-     actions: read
-
-    name: Generate SBOM (CycloneDX)
+    name: Generate SBOM (Trivy CycloneDX)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - name: Set up JDK
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
-        with:
-          distribution: temurin
-          java-version: 21
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
 
-      - name: Cache Maven
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: maven-
-
-      - name: Install dependencies (no tests)
-        run: mvn -B -q dependency:resolve dependency:resolve-plugins
-
-      - name: Generate SBOM (CycloneDX via Maven)
-        run: mvn -B org.cyclonedx:cyclonedx-maven-plugin:2.7.9:makeAggregateBom
+      - name: Generate SBOM (CycloneDX via Trivy)
+        run: |
+          trivy fs . \
+            --format cyclonedx \
+            --output sbom.json
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: sbom-cyclonedx
-          path: target/bom.json
+          path: sbom.json
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
 
   sca:
-    permissions:
-     contents: read
-     actions: read
-
-    name: Scan SBOM with Trivy
-    needs: sbom
+    name: Scan SBOM with Trivy (SCA)
     runs-on: ubuntu-latest
+    needs: sbom
+    permissions:
+      contents: read
+      actions: read
 
     steps:
       - name: Checkout
@@ -88,21 +82,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
 
-      - name: Debug workspace
-        run: |
-         echo "PWD = $(pwd)"
-         ls -R .
-
       - name: Scan SBOM (fail on HIGH/CRITICAL)
-        working-directory: .
         run: |
-          trivy sbom \
+          trivy sbom sbom.json \
             --severity HIGH,CRITICAL \
-            --ignorefile config/trivy/.trivyignore \
             --ignore-unfixed=false \
             --exit-code 1 \
             --format json \
-            bom.json > trivy-sbom-report.json
+            > trivy-sbom-report.json
 
       - name: Upload Trivy SBOM scan report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
