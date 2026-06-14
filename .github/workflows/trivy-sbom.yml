@@ -42,6 +42,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
 
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+           distribution: temurin
+           java-version: 21
+
+      - name: Cache Maven
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-
+
+      - name: Preload Maven dependencies
+        run: mvn -B -q dependency:resolve dependency:resolve-plugins      
+
       - name: Generate SBOM (CycloneDX via Trivy)
         run: |
           trivy fs . \
