@@ -10,4 +10,4 @@ spec:
         - name: ghcr-secret
       containers:
         - name: coreservice
-          image: ghcr.io/vcharrie/coreservice:a9ba2dfd768b2039595eab3b53cc7172f4b0c1d7
+          image: ghcr.io/vcharrie/coreservice:3961bd822fd57171c58431f93a5f1b4a78f2fe89

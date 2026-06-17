@@ -1,0 +1,34 @@
+@startuml
+title Architecture Logique – CoreService V1
+
+package "Couche API" as API {
+  component "HealthController" as Controller
+}
+
+package "Couche Application" as APP {
+  component "Application Logic\n(minimaliste)" as AppLogic
+}
+
+package "Couche Configuration" as CFG {
+  component "Configuration\n(application.properties)" as Config
+  component "Auto-configuration\n(Spring Boot)" as AutoConfig
+}
+
+package "Couche Tests" as TESTS {
+  component "Tests Unitaires" as UnitTests
+  component "Tests Intégration Internes" as IntTests
+}
+
+' Flux logiques internes
+Controller --> AppLogic : Appel logique
+AppLogic --> Config : Lecture configuration
+AppLogic --> AutoConfig : Utilisation auto-config
+
+' Tests
+UnitTests --> Controller : Tests isolés
+IntTests --> Controller : Tests avec contexte Spring
+IntTests --> AppLogic
+IntTests --> Config
+
+@enduml
+

@@ -1,0 +1,34 @@
+@startuml
+title Architecture Applicative – CoreService V1
+
+actor "Client HTTP" as Client
+actor "Système de supervision" as Monitoring
+
+rectangle "CoreService (Module Applicatif)" as Core {
+
+  rectangle "Services Applicatifs Exposés" as Services {
+    usecase "Health Check Applicatif\nGET /api/health\nRéponse JSON" as U1
+    usecase "Health Check Technique\nGET /actuator/health\nRéponse JSON" as U2
+  }
+}
+
+Client --> U1 : HTTP/REST\nGET /api/health
+Monitoring --> U2 : HTTP/REST\nGET /actuator/health
+
+note right of U1
+  Format de réponse :
+  {
+    "version": "v1",
+    "status": "UP"
+  }
+end note
+
+note right of U2
+  Format de réponse :
+  {
+    "status": "UP"
+  }
+end note
+
+@enduml
+

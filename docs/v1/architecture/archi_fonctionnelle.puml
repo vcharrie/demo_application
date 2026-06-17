@@ -1,0 +1,30 @@
+@startuml
+title Architecture Fonctionnelle – CoreService V1
+
+actor "Client HTTP" as Client
+actor "Système de supervision" as Monitoring
+
+rectangle "CoreService API" as API {
+  
+  usecase "Health Check Technique\n/actuator/health" as U1
+  usecase "Health Check Applicatif\n/api/health" as U2
+}
+
+Client --> U2 : GET /api/health
+Monitoring --> U1 : GET /actuator/health
+
+note right of U1
+  Retourne l'état technique Spring Boot :
+  - status: "UP"
+  - détails internes Actuator
+end note
+
+note right of U2
+  Retourne l'état applicatif :
+  {
+    "version": "v1",
+    "status": "UP"
+  }
+end note
+
+@enduml

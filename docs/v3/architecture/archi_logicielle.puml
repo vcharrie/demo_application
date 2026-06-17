@@ -1,0 +1,76 @@
+@startuml
+title Architecture Logicielle – CoreService V3 (Packaging Docker + Chaîne Logicielle Sécurisée)
+
+' --- Socle d'exécution ---
+rectangle "Socle d'exécution\n(JRE 21 – Base Temurin)" as Runtime
+
+' --- Image Docker finale ---
+rectangle "Image Docker durcie\n(CoreService:latest)" as Image {
+
+  rectangle "Dockerfile (Packaging Container)" as Dockerfile {
+    component "Base image Temurin 21\n(pinned digest)"
+    component "User non-root (UID 10001)"
+    component "Healthcheck /actuator/health"
+    component "Entrypoint exec"
+    component "Labels OCI"
+  }
+
+  rectangle "CoreServiceApplication.jar\n(Package Spring Boot complet)" as Jar {
+
+    rectangle "Code Applicatif" as Code {
+      component "HealthController"
+      component "Application Logic"
+    }
+
+    rectangle "Dépendances Spring Boot" as SpringDeps {
+      component "Spring Boot 3.4.x"
+      component "Spring Web MVC"
+      component "Spring Boot Actuator"
+      component "Auto-configurations"
+    }
+  }
+}
+
+' --- Artefacts de test ---
+rectangle "Artefacts de test\n(non inclus dans le jar)" as Tests {
+  component "Spring Web MVC Test\n(scope test)" as WebMvcTest
+}
+
+' --- Chaîne logicielle CI/CD ---
+rectangle "Chaîne Logicielle CI/CD\n(Production des artefacts logiciels)" as CICD {
+
+  rectangle "Build & Packaging Maven" as Build {
+    component "Maven\n(spring-boot-maven-plugin)"
+    component "Tests unitaires"
+  }
+
+  rectangle "SAST" as SAST {
+    component "Checkstyle"
+    component "PMD"
+    component "SpotBugs"
+  }
+
+  rectangle "SBOM & SCA" as SBOM {
+    component "CycloneDX SBOM\n(bom.json)"
+    component "Trivy SBOM Scan\n(HIGH/CRITICAL)"
+  }
+
+  rectangle "Scan Image Docker" as ScanImage {
+    component "Trivy Image Scan\n(HIGH/CRITICAL)"
+    component ".trivyignore\n(VEX – No Fix Available)"
+  }
+}
+
+' --- Relations ---
+Build --> Jar : Génère\nle package JAR
+Tests --> Build : Exécutés\nlors du build
+Jar --> Dockerfile : Intégré dans\nl'image Docker
+Dockerfile --> Image : Produit\nl'image finale
+Image -down- Runtime : S'exécute sur
+
+Build --> SAST : Analyse\nstatique du code
+Build --> SBOM : Génère\nle SBOM CycloneDX
+SBOM --> ScanImage : Analyse\nSCA Trivy
+Image --> ScanImage : Analyse\nOS + libs
+
+@enduml
