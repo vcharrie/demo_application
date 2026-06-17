@@ -9,20 +9,36 @@ Le projet a été construit **release par release**, avec une complexité croiss
 
 ## 📘 1. Document central — Vision & démarche
 
-Le document chapeau présente :
+La documentation du projet CoreService est **versionnée** : chaque release introduit de nouveaux éléments (architecture, CI/CD, sécurité, Kubernetes, etc.) et la documentation évolue en parallèle.  
+Les dossiers présents dans `/docs/v1`, `/docs/v2`, `/docs/v3`, `/docs/v4` reflètent l’état réel du projet à chaque étape.
 
-- la vision globale du projet,  
-- la démarche pédagogique,  
-- l’approche itérative,  
-- la collaboration humain–IA,  
-- les releases réalisées,  
-- la roadmap,  
-- les compétences acquises.
+Deux documents transverses permettent de comprendre cette progression :
 
-👉 **Lire le document chapeau :**  
+### 🔹 Document recruteur — Vue d’ensemble non technique
+[`/docs/doc-recruteur.md`](docs/doc-recruteur.md)
+
+Document destiné à un public **non opérationnel** (RH, managers stratégiques, décideurs).  
+Il présente :
+- la finalité du projet,
+- son périmètre,
+- les compétences démontrées,
+- la logique d’évolution.
+
+Il fournit une **vision synthétique et accessible**, sans entrer dans les détails techniques.
+
+### 🔹 Document chapeau — Vision approfondie et opérationnelle
 [`/docs/doc-chapeau.md`](docs/doc-chapeau.md)
 
-Ce document est la **porte d’entrée principale** pour comprendre la logique du projet.
+Document destiné à un public **technique ou opérationnel** (architectes, tech leads, consultants, managers engineering).  
+Il décrit :
+- la démarche complète,
+- les choix d’architecture,
+- les patterns utilisés,
+- les pratiques DevSecOps,
+- les releases détaillées,
+- la logique d’évolution version par version.
+
+Il constitue la **référence principale** pour comprendre la construction du projet et son niveau de maturité.
 
 ---
 
@@ -117,18 +133,47 @@ Les pipelines sont visibles dans `.github/workflows/`.
 
 ---
 
-## 📂 7. Documentation par release
+## 📚 7. Documentation
 
-Toute la documentation est organisée par version dans :  
-👉 [`/docs/`](docs/)
+### 🔹 Documents transverses
+- Document recruteur : [`/docs/doc-recruteur.md`](docs/doc-recruteur.md)  
+- Document chapeau : [`/docs/doc-chapeau.md`](docs/doc-chapeau.md)
 
-Chaque release contient :
+### 🔹 Documentation versionnée
 
-- spécification technique,  
-- architecture,  
-- fiches sécurité,  
-- release note,  
-- README dédié.
+La documentation détaillée est organisée **par version**, afin de refléter l’évolution réelle du projet :
+
+#### 📁 V1 — Socle applicatif & premières pratiques
+[`/docs/v1`](docs/v1)
+- Architecture V1  
+- Spécification fonctionnelle V1  
+- Processus DevOps & traçabilité V1  
+- Sécurité V1  
+- Spécification technique V1  
+- Release Note V1  
+
+#### 📁 V2 — Architecture en couches, CRUD & containerisation
+[`/docs/v2`](docs/v2)
+- Architecture V2  
+- Spécification fonctionnelle V2  
+- Spécification métier V2  
+- Sécurité V2  
+- Spécification technique V2  
+- Release Note V2  
+
+#### 📁 V3 — DevSecOps, durcissement & CI/CD avancée
+[`/docs/v3`](docs/v3)
+- Architecture V3  
+- CI/CD (pipelines, PR, build)  
+- Sécurité (SAST, SCA, SBOM, Dockerfile durci, SLSA, secrets)  
+- Spécification technique V3  
+- Release Note V3  
+
+#### 📁 V4 — Kubernetes, Kustomize & déploiement automatisé
+[`/docs/v4`](docs/v4)
+- Architecture Kubernetes (base + overlay local)  
+- Spécification technique V4  
+- Release Note V4
 
 ---
 
@@ -144,8 +189,8 @@ Chaque release contient :
 
 ## 📬 9. Contact
 
-- **Email** : vincent.xxx@mail.com  
-- **LinkedIn** : https://linkedin.com/in/xxxx  
+- **Email** : charrier_vincent@proton.me  
+- **LinkedIn** : https://www.linkedin.com/in/vincentcharrier/  
 - **GitHub** : https://github.com/xxxx  
 
 ---

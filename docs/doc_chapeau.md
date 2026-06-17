@@ -71,7 +71,7 @@ Toutes les productions ont été **validées, ajustées et contrôlées** par l�
 Une seconde IA (Claude) a été utilisée comme **outil de contrôle**, notamment pour :
 
 - challenger les propositions de Copilot,
-- vérifier la cohérence des fichifications sécurité,
+- vérifier la cohérence des spécifications techniques et fiches sécurité,
 - confronter les choix techniques,
 - identifier des points d’amélioration.
 
@@ -90,32 +90,109 @@ Ce processus démontre une capacité à **piloter plusieurs IA dans un contexte 
 
 ## 5. Releases réalisées
 
-### Release V1 — Structure backend
-- Squelette Spring Boot,
-- Endpoints REST initiaux,
-- Première documentation.
+### **V1 — Socle applicatif minimal & CI de base**
+La première version pose les fondations du projet :
 
-### Release V2 — Sécurité applicative
-- Validation d’entrée,
-- Gestion centralisée des erreurs,
-- Format d’erreur JSON standardisé,
-- Sanitizing des logs.
+- Healthcheck applicatif (`/api/health`) et technique (`/actuator/health`)
+- Architecture fonctionnelle, logique, logicielle et technique documentée
+- Projet Spring Boot 4.0.3 / Java 17
+- Packaging Maven propre (`mvn clean test package`)
+- Tests unitaires WebMvcTest
+- Première CI GitHub Actions :
+  - build Maven
+  - exécution des tests
+  - génération du JAR
+- Documentation d’architecture complète (schémas + document chapeau)
 
-### Release V3 — CI/CD et sécurité
-- Pipeline GitHub Actions,
-- Build Maven + Docker,
-- SBOM CycloneDX,
-- Scan SCA (Trivy),
-- Scan image (Trivy),
-- Politique de blocage sur vulnérabilités HIGH/CRITICAL.
+**👉 V1 = un socle propre, stable, documenté, prêt pour l’itération.**
 
-### Release V4 — Déploiement Kubernetes (kind)
-- Cluster kind,
-- Structure Kustomize (base + overlays),
-- Deployment, Service, Ingress,
-- Probes readiness/liveness,
-- Patch dynamique de l’image via SHA,
-- Déploiement automatisé via CI/CD.
+---
+
+### **V2 — Architecture en couches, CRUD métier & containerisation**
+Cette version introduit la première vraie logique applicative :
+
+- Architecture en couches complète :
+  - API (controllers + exception handler)
+  - Application (service)
+  - Domaine (entité métier + exceptions)
+  - Infrastructure (repository en mémoire + mapper)
+- Nouveau modèle métier `Resource`
+- CRUD complet :
+  - GET/POST/PUT/DELETE `/api/resources`
+- Gestion centralisée des erreurs (GlobalExceptionHandler)
+- Containerisation complète :
+  - Dockerfile multi‑stage
+  - Exécution locale via Docker Desktop
+- CI/CD enrichie :
+  - build Maven
+  - build Docker multi-stage
+  - push GHCR
+  - smoke test containerisé
+
+**👉 V2 = première vraie application + première chaîne CI/CD complète + containerisation.**
+
+---
+
+### **V3 — Durcissement sécurité, DevSecOps complet & pipeline avancé**
+La V3 marque une rupture : passage à une chaîne DevSecOps professionnelle.
+
+#### Sécurité & packaging
+- Dockerfile durci :
+  - base image Temurin 21 JRE (digest épinglé)
+  - user non‑root
+  - healthcheck
+  - labels OCI
+- Suppression du multi‑stage : build Maven externe obligatoire
+
+#### CI/CD DevSecOps
+Pipeline complet et strict :
+
+- Build Maven (`mvn clean verify`)
+- SAST : Checkstyle, PMD, SpotBugs
+- SBOM CycloneDX
+- SCA Trivy (fail HIGH/CRITICAL)
+- Scan image Docker (fail HIGH/CRITICAL)
+- Exécution du container en CI (healthcheck + smoke test)
+- Push GHCR (digest immuable)
+- Analyse SonarCloud (Quality Gate)
+
+#### Gestion des vulnérabilités
+- Processus CVE structuré
+- `.trivyignore` (VEX)
+- Montées de versions Spring Boot / Tomcat / Spring Security
+
+**👉 V3 = pipeline DevSecOps complet, durcissement sécurité, gestion CVE, qualité logicielle.**
+
+---
+
+### **V4 — Déploiement Kubernetes (kind), Kustomize & CI/CD de déploiement**
+La V4 introduit l’infrastructure Kubernetes et le déploiement automatisé.
+
+#### Kubernetes (kind)
+- Cluster local kind
+- Namespace `coreservice`
+- Ingress NGINX + routage `/api/*`
+- Probes readiness/liveness
+- Requests/limits CPU & RAM
+- Container non‑root
+
+#### Kustomize
+- Base générique (`k8s/base`)
+- Overlay local (`k8s/overlays/local`)
+- Patch dynamique de l’image via SHA
+- Patch probes & ressources
+
+#### CI/CD Kubernetes
+- Build Maven
+- Build Docker
+- SBOM CycloneDX
+- SCA Trivy
+- Scan image
+- Push GHCR (SHA)
+- Déploiement automatique sur kind
+- Vérification du rollout
+
+**👉 V4 = première infrastructure Kubernetes + déploiement automatisé + sécurité renforcée.**
 
 ---
 
