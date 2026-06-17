@@ -162,3 +162,11 @@ CoreService est un projet complet démontrant :
 - une collaboration humain–IA structurée.
 
 Il constitue une preuve de maîtrise des pratiques actuelles d’ingénierie logicielle, DevSecOps et architecture cloud.
+
+---
+
+## 📄 11. Licence
+
+Ce projet est publié sous licence **Apache 2.0**, afin de permettre la consultation et l’inspiration tout en protégeant l’attribution.
+
+Voir le fichier [`LICENSE`](LICENSE) à la racine du dépôt.
