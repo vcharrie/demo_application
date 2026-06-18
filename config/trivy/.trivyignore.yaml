@@ -1,0 +1,59 @@
+# =================================================================
+# TRIVY IGNORE — CoreService
+# Toute entrée doit référencer SEC-DEP-02 (processus CVE)
+# Révision mensuelle obligatoire
+# =================================================================
+
+vulnerabilities:
+
+  # ---------------------------------------------------------------
+  # OS Layer — Ubuntu 24.04 — No fix available (D2)
+  # ---------------------------------------------------------------
+
+  - id: CVE-2026-27456
+    statement: "No fix available in Ubuntu 24.04 at scan time (D2 — OS package)."
+    expiration: "2026-12-31"
+
+  - id: CVE-2026-2219
+    statement: "No fix available in Ubuntu 24.04 at scan time (D2 — OS package)."
+    expiration: "2026-12-31"
+
+  - id: CVE-2026-4046
+    statement: "No fix available in Ubuntu 24.04 at scan time (D2 — OS package)."
+    expiration: "2026-12-31"
+
+  - id: CVE-2026-4437
+    statement: "No fix available in Ubuntu 24.04 at scan time (D2 — OS package)."
+    expiration: "2026-12-31"
+
+  - id: CVE-2026-4438
+    statement: "No fix available in Ubuntu 24.04 at scan time (D2 — OS package)."
+    expiration: "2026-12-31"
+
+  - id: CVE-2025-66382
+    statement: "No fix available in Ubuntu 24.04 at scan time (D2 — OS package)."
+    expiration: "2026-12-31"
+
+  - id: CVE-2024-2236
+    statement: "No fix available in Ubuntu 24.04 at scan time (D2 — OS package)."
+    expiration: "2026-12-31"
+
+
+  # ---------------------------------------------------------------
+  # Java Layer — Spring Boot Actuator — VEX Not Affected (SCA-2)
+  # ---------------------------------------------------------------
+
+  - id: CVE-2026-22731
+    statement: >
+      VEX Not Affected (SCA-2). Actuator endpoints disabled in all production
+      profiles (management.endpoints.enabled-by-default=false). Only
+      /actuator/health enabled in isolated CI/CD profile. Fix available only
+      in Spring Boot 3.5.x+, outside current 3.4.x branch.
+    expiration: "2026-12-31"
+
+  - id: CVE-2026-22733
+    statement: >
+      VEX Not Affected (SCA-2). CloudFoundry Actuator endpoint explicitly
+      disabled in all profiles (management.endpoint.cloudfoundry.enabled=false).
+      Fix available only in Spring Boot 3.5.x+, outside current 3.4.x branch.
+    expiration: "2026-12-31"

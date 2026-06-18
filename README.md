@@ -15,7 +15,7 @@ Les dossiers présents dans `/docs/v1`, `/docs/v2`, `/docs/v3`, `/docs/v4` refl�
 Deux documents transverses permettent de comprendre cette progression :
 
 ### 🔹 Document recruteur — Vue d’ensemble non technique
-[`/docs/doc-recruteur.md`](docs/doc-recruteur.md)
+[`/docs/doc_recruteur.md`](docs/doc_recruteur.md)
 
 Document destiné à un public **non opérationnel** (RH, managers stratégiques, décideurs).  
 Il présente :
@@ -27,7 +27,7 @@ Il présente :
 Il fournit une **vision synthétique et accessible**, sans entrer dans les détails techniques.
 
 ### 🔹 Document chapeau — Vision approfondie et opérationnelle
-[`/docs/doc-chapeau.md`](docs/doc-chapeau.md)
+[`/docs/doc_chapeau.md`](docs/doc_chapeau.md)
 
 Document destiné à un public **technique ou opérationnel** (architectes, tech leads, consultants, managers engineering).  
 Il décrit :

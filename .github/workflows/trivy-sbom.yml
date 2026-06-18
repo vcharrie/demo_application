@@ -102,6 +102,7 @@ jobs:
         run: |
           trivy sbom sbom.json \
             --severity HIGH,CRITICAL \
+            --ignorefile config/trivy/.trivyignore.yaml \
             --ignore-unfixed=false \
             --exit-code 0 \
             --format json \
