@@ -1,15 +1,15 @@
 @startuml
-title Architecture Logicielle – CoreService V1 (Packaging Spring Boot)
+title Architecture Logicielle – CoreService V2 (Packaging Spring Boot)
 
 ' --- Socle d'exécution ---
-rectangle "Socle d'exécution\n(JRE 17)" as Runtime
+rectangle "Socle d'exécution\n(JRE 21)" as Runtime
 
 ' --- Application packagée ---
 rectangle "CoreServiceApplication.jar\n(Package Spring Boot complet)" as Jar {
 
   rectangle "Code Applicatif" as Code {
     component "HealthController"
-    component "Application Logic"
+    component "ResourceController"
   }
 
   rectangle "Dépendances Spring Boot" as SpringDeps {
@@ -22,7 +22,8 @@ rectangle "CoreServiceApplication.jar\n(Package Spring Boot complet)" as Jar {
 
 ' --- Tests séparés ---
 rectangle "Artefacts de test\n(non inclus dans le jar)" as Tests {
-  component "Spring Web MVC Test\n(scope test)" as WebMvcTest
+  component "Tests unitaires"
+  component "Tests d'intégration"
 }
 
 ' --- Build Maven externe ---

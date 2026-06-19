@@ -1,0 +1,56 @@
+@startuml
+title Architecture Docker – CoreService V3
+subtitle Structure interne de l’image durcie (runtime-only)
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ============================================================
+' 1. BASE IMAGE
+' ============================================================
+rectangle "Base Image\nEclipse Temurin JRE 21\n(digest immuable)" as Base {
+
+  component "OS minimal\n(Debian/Ubuntu slim)" as OS
+  component "JRE 21\n(Temurin)" as JRE
+}
+
+' ============================================================
+' 2. APPLICATION
+' ============================================================
+rectangle "Application" as App {
+
+  component "/app/app.jar\n(CoreServiceApplication.jar)" as Jar
+  component "Spring Boot 3.4.13\n(Web, Actuator, JPA, Security)" as Spring
+  component "Configuration embarquée\n(application.yml)" as Config
+}
+
+' ============================================================
+' 3. SÉCURISATION DE L’IMAGE
+' ============================================================
+rectangle "Durcissement de l’image" as Hardening {
+
+  component "USER 10001\n(non-root)" as User
+  component "Filesystem read-only" as ReadOnly
+  component "Répertoire /app\npermissions restreintes" as AppDir
+  component "Labels OCI\n(org.opencontainers.image.*)" as Labels
+}
+
+' ============================================================
+' 4. EXÉCUTION
+' ============================================================
+rectangle "Entrypoint & Command" as Exec {
+
+  component "ENTRYPOINT [\"java\", \"-jar\", \"/app/app.jar\"]\n(mode exec)" as Entrypoint
+  component "HEALTHCHECK\nwget --spider http://localhost:8080/actuator/health" as Health
+  component "EXPOSE 8080" as Port
+}
+
+' ============================================================
+' RELATIONS
+' ============================================================
+Base --> App : COPY app.jar\n+ dépendances
+App --> Hardening : Application\n+ durcissement
+Hardening --> Exec : Image prête\nà l’exécution
+
+@enduml

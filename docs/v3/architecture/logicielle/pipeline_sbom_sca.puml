@@ -1,0 +1,39 @@
+@startuml
+title SBOM + SCA Flow – CoreService V3 (Supply Chain Logicielle)
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ===================================================================
+' 1. SBOM GENERATION (Trivy FS)
+' ===================================================================
+rectangle "SBOM Generation\n(Workflow: sbom)" as SBOM {
+  component "Checkout"
+  component "Install Trivy"
+  component "Preload Maven deps\n(mvn dependency:resolve)"
+  component "Trivy FS Scan\n→ sbom.json (CycloneDX)" as SbomJson
+  component "Upload sbom.json"
+}
+
+' ===================================================================
+' 2. SCA ANALYSIS (Trivy SBOM)
+' ===================================================================
+rectangle "SCA Analysis\n(Workflow: sca)" as SCA {
+  component "Checkout"
+  component "Download sbom.json"
+  component "Install Trivy"
+  component "Trivy SBOM Scan\n--severity HIGH,CRITICAL\n--ignore-unfixed=false\n--ignorefile .trivyignore.yaml" as TrivySbom
+  component "Rapport JSON\ntrivy-sbom-report.json" as SbomReport
+  component "Gate sécurité\n(fail si HIGH/CRITICAL)" as Gate
+  component "Upload rapport SCA"
+}
+
+' ===================================================================
+' RELATIONS
+' ===================================================================
+SbomJson --> SCA : sbom.json\n(artifact)
+TrivySbom --> SbomReport : Génère\nrapport SCA
+SbomReport --> Gate : Analyse\nvulnérabilités
+
+@enduml

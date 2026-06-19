@@ -1,0 +1,61 @@
+@startuml
+title CVE Flow – CoreService V3 (Supply Chain Logicielle)
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ============================================================
+' 1. DÉTECTION DES VULNÉRABILITÉS
+' ============================================================
+rectangle "Détection CVE" as Detect {
+  component "Trivy SBOM Scan\n(SCA – dépendances Maven)"
+  component "Trivy Image Scan\n(OS + libs)"
+  component "Sources CVE\n(NVD, GitHub Advisories)"
+}
+
+' ============================================================
+' 2. ANALYSE & QUALIFICATION
+' ============================================================
+rectangle "Qualification CVE" as Qualif {
+  component "Analyse du contexte\n(lib, version, impact)"
+  component "Vérification exploitabilité\n(CVSS, vecteurs)"
+  component "Vérification présence réelle\n(lib chargée ? code utilisé ?)"
+  component "Cross-check\navec .trivyignore"
+}
+
+' ============================================================
+' 3. DÉCISION
+' ============================================================
+rectangle "Décision" as Decision {
+  component "Fix disponible\n→ mise à jour"
+  component "No Fix Available\n→ justification VEX"
+  component "False Positive\n→ exclusion"
+}
+
+' ============================================================
+' 4. ACTIONS & TRAÇABILITÉ
+' ============================================================
+rectangle "Actions & Traçabilité" as Actions {
+  component "Mise à jour dépendance\nou image base"
+  component "Ajout justification\n(.trivyignore / VEX)"
+  component "Documentation\n(metadata, rapport)"
+}
+
+' ============================================================
+' 5. GATE CI/CD
+' ============================================================
+rectangle "Gate CI/CD\n(Blocage pipeline)" as Gate {
+  component "Fail si HIGH/CRITICAL\nnon justifiées"
+  component "Succès si :\n- pas de vulnérabilité\n- ou justification VEX valide"
+}
+
+' ============================================================
+' RELATIONS
+' ============================================================
+Detect --> Qualif : CVE détectées
+Qualif --> Decision : Analyse\n→ classification
+Decision --> Actions : Application\nde la décision
+Actions --> Gate : Contrôle final\navant publication
+
+@enduml

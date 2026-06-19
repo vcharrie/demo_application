@@ -3,47 +3,67 @@ title Architecture Fonctionnelle – CoreService V2
 
 actor "Client HTTP" as Client
 actor "Système de supervision" as Monitoring
-actor "Pipeline CI/CD\n(GitHub Actions)" as CICD
-actor "Registry GHCR" as GHCR
 
 rectangle "CoreService API (Container Docker)" as API {
 
-  usecase "Health Check Technique\n/actuator/health" as U1
-  usecase "Health Check Applicatif\n/api/health" as U2
+  rectangle "Fonctionnalités Exposées" as Features {
+
+    usecase "Health Check Applicatif\nGET /api/health" as U1
+    usecase "Health Check Technique\nGET /actuator/health" as U2
+
+    usecase "Lister les ressources\nGET /resources" as U3
+    usecase "Lire une ressource\nGET /resources/{id}" as U4
+    usecase "Supprimer une ressource\nDELETE /resources/{id}" as U5
+
+    usecase "Créer une ressource\nPOST /resources\n(non fonctionnel en V2)" as U6
+  }
 }
 
-Client --> U2 : GET /api/health
-Monitoring --> U1 : GET /actuator/health
+' --- Flux fonctionnels ---
 
-CICD --> GHCR : Push image\ncoreservice:latest
-GHCR --> API : Pull image\ncoreservice:latest
+Client --> U1 : GET /api/health
+Monitoring --> U2 : GET /actuator/health
+
+Client --> U3 : GET /resources
+Client --> U4 : GET /resources/{id}
+Client --> U5 : DELETE /resources/{id}
+Client --> U6 : POST /resources
+
+' --- Notes explicatives ---
 
 note right of U1
-  Retourne l'état technique Spring Boot :
-  - status: "UP"
-  - détails internes Actuator
-end note
-
-note right of U2
-  Retourne l'état applicatif :
+  Retourne :
   {
     "version": "v2",
     "status": "UP"
   }
 end note
 
-note bottom of CICD
-  Le pipeline CI/CD :
-  - build Maven
-  - build Docker multi-stage
-  - push GHCR
-  - smoke test
+note right of U2
+  Retourne l'état technique Spring Boot :
+  - status: "UP"
 end note
 
-note bottom of GHCR
-  Registry d'images :
-  - stockage de l'image finale
-  - pull par l'environnement d'exécution
+note right of U3
+  Retourne la liste des ressources :
+  - [] si aucune ressource
+end note
+
+note right of U4
+  Si id inconnu :
+  - 404 texte brut : "Resource not found"
+end note
+
+note right of U5
+  Si id inconnu :
+  - 404 texte brut
+  Si ressource existante :
+  - suppression définitive
+end note
+
+note right of U6
+  Fonctionnalité présente mais non opérationnelle en V2 :
+  - renvoie systématiquement 500
 end note
 
 @enduml

@@ -1,0 +1,52 @@
+@startuml
+title VEX – CoreService V3 (Qualification & Justification des Vulnérabilités)
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ============================================================
+' 1. INPUT : VULNÉRABILITÉS TRIVY
+' ============================================================
+rectangle "Input Vulnérabilités\n(Trivy SBOM + Image Scan)" as Input {
+  component "Rapport SBOM\ntrivy-sbom-report.json"
+  component "Rapport Image\ntrivy-image-report.json"
+}
+
+' ============================================================
+' 2. ANALYSE VEX
+' ============================================================
+rectangle "Analyse VEX\n(Validation des vulnérabilités)" as VexAnalysis {
+  component "Vérifier :\nlib concernée, version,\nchemin, usage réel"
+  component "Évaluer impact :\nCVSS, surface d’attaque"
+  component "Identifier :\nFix disponible ?\nNo Fix Available ?"
+}
+
+' ============================================================
+' 3. JUSTIFICATION & EXCLUSION
+' ============================================================
+rectangle "Justification\n(.trivyignore / VEX)" as Justif {
+  component "Cas No Fix Available\n→ justification documentée"
+  component "Cas False Positive\n→ exclusion motivée"
+  component "Cas Accepté temporairement\n→ justification + suivi"
+}
+
+rectangle ".trivyignore / .trivyignore.yaml\n(Règles VEX appliquées)" as TrivyIgnore
+
+' ============================================================
+' 4. IMPACT SUR LE PIPELINE
+' ============================================================
+rectangle "Impact sur CI/CD\n(Gate sécurité)" as Gate {
+  component "Si HIGH/CRITICAL\nsans justification VEX\n→ FAIL pipeline"
+  component "Si vulnérabilités\njustifiées VEX\n→ pipeline OK"
+}
+
+' ============================================================
+' RELATIONS
+' ============================================================
+Input --> VexAnalysis : Vulnérabilités\nTrivy
+VexAnalysis --> Justif : Décision\nsur chaque CVE
+Justif --> TrivyIgnore : Ajout règles\nVEX (.trivyignore)
+TrivyIgnore --> Gate : Influence\nsur le gate sécurité
+
+@enduml
