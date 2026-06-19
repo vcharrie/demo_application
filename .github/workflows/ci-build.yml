@@ -208,7 +208,7 @@ jobs:
             --pkg-types os,library \
             --severity CRITICAL,HIGH \
             --ignore-unfixed=true \
-            --ignorefile config/trivy/.trivyignore \
+            --ignorefile config/trivy/.trivyignore.yaml \
             $REGISTRY/$IMAGE_NAME:$COMMIT_SHA
           echo "exit_code=$?" >> $GITHUB_OUTPUT
           set -e
