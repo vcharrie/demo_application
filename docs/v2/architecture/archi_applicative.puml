@@ -1,0 +1,47 @@
+@startuml
+title Architecture Applicative – CoreService V2
+
+actor "Client HTTP" as Client
+actor "Système de supervision" as Monitoring
+
+rectangle "CoreService (Module Applicatif)" as Core {
+
+  rectangle "API (Entrée Applicative)" as API {
+
+    usecase "Health Applicatif\nGET /api/health" as U1
+    usecase "Health Technique\nGET /actuator/health" as U0
+
+    usecase "Lister les ressources\nGET /resources" as U2
+    usecase "Lire une ressource\nGET /resources/{id}" as U3
+    usecase "Supprimer une ressource\nDELETE /resources/{id}" as U4
+    usecase "Créer une ressource\nPOST /resources\n(non fonctionnel en V2)" as U5
+  }
+
+  rectangle "Domaine (Règles Métier)" as Domain {
+    usecase "Validation métier\net règles fonctionnelles" as D1
+  }
+
+  rectangle "Infrastructure (Stockage en mémoire)" as Infra {
+    usecase "Accès aux données\n(Map interne)" as I1
+  }
+}
+
+' --- Flux applicatifs externes ---
+Client --> U1 : GET /api/health\nRéponse texte
+Monitoring --> U0 : GET /actuator/health\nRéponse JSON
+
+Client --> U2 : GET /resources\nRéponse JSON
+Client --> U3 : GET /resources/{id}\nRéponse JSON ou 404 texte
+Client --> U4 : DELETE /resources/{id}\n204 ou 404 texte
+Client --> U5 : POST /resources\n500 (non fonctionnel)
+
+' --- Flux applicatifs internes (abstraits) ---
+U2 --> D1
+U3 --> D1
+U4 --> D1
+U5 --> D1
+
+D1 --> I1
+I1 --> D1
+
+@enduml

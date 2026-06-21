@@ -1,0 +1,36 @@
+@startuml
+title Architecture Technique – CoreService V1
+
+' --- Poste développeur Windows ---
+node "Poste Développeur\nWindows 10/11" as Dev {
+
+  rectangle "JRE 17\n(Socle d'exécution)" as JRE {
+    component "CoreServiceApplication.jar" as Jar
+  }
+
+  component "Postman\n(Appels REST)" as Postman
+  component "Git (CLI / GUI)" as GitLocal
+}
+
+' --- Réseau local ---
+cloud "Réseau Local\nlocalhost:8080" as Network
+
+' --- GitHub ---
+node "GitHub (Cloud)" as GitHub {
+  component "Repository Git" as Repo
+  component "GitHub Actions\n(CI/CD)" as CI
+}
+
+' --- Flux techniques ---
+Postman --> Network : Requêtes HTTP/REST
+Network --> Jar : Appels REST\nvers l'application
+Jar --> Network : Réponses JSON
+
+GitLocal --> Repo : Push / Pull / PR
+Repo --> GitLocal : Code / Historique
+
+CI --> Repo : Build CI\n(mvn clean test package)
+Repo --> CI : Déclenchement\nsur push/PR
+
+@enduml
+

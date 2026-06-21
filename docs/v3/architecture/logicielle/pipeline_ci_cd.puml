@@ -1,0 +1,90 @@
+@startuml
+title Pipeline CI/CD – CoreService V3 (Supply Chain Logicielle)
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ===================================================================
+' JOB 1 — BUILD (Maven clean test)
+' ===================================================================
+rectangle "build\n(Maven clean test)" as Build {
+  component "Checkout"
+  component "Setup JDK 21"
+  component "Cache Maven"
+  component "mvn clean test"
+  component "Upload JUnit reports"
+}
+
+' ===================================================================
+' JOB 2 — SAST (Checkstyle, PMD, SpotBugs, Sonar)
+' ===================================================================
+rectangle "sast\n(Analyse statique)" as SAST {
+  component "Checkout"
+  component "Setup JDK 21"
+  component "mvn verify\n(Checkstyle/PMD/SpotBugs)"
+  component "SonarCloud Scan"
+  component "Upload rapports SAST"
+}
+
+' ===================================================================
+' JOB 3 — IMAGE BUILD (JAR + Docker build)
+' ===================================================================
+rectangle "image-build\n(Build JAR + Image Docker)" as ImageBuild {
+  component "Checkout"
+  component "Setup JDK 21"
+  component "mvn clean package"
+  component "docker build\n(runtime-only)"
+  component "docker push\n(image non validée)"
+}
+
+' ===================================================================
+' JOB 4 — IMAGE SCAN (Trivy)
+' ===================================================================
+rectangle "image-scan\n(Trivy Image Scan)" as ImageScan {
+  component "docker pull\n(image non validée)"
+  component "Install Trivy"
+  component "Trivy image scan\n--severity HIGH,CRITICAL"
+  component "Upload rapport JSON"
+  component "Gate sécurité\n(fail si vulnérabilités)"
+}
+
+' ===================================================================
+' JOB 5 — PUBLISH (digest immuable)
+' ===================================================================
+rectangle "publish\n(Publication officielle)" as Publish {
+  component "docker pull\n(image validée)"
+  component "docker inspect\n→ RepoDigest"
+  component "metadata.txt\n(digest + sha + date)"
+  component "Upload metadata"
+}
+
+' ===================================================================
+' JOB 6 — DEPLOY (Smoke test)
+' ===================================================================
+rectangle "deploy\n(Smoke test Docker)" as Deploy {
+  component "docker pull"
+  component "docker run -d"
+  component "curl /actuator/health"
+  component "docker stop"
+}
+
+' ===================================================================
+' JOB 7 — CLEANUP
+' ===================================================================
+rectangle "cleanup\n(Nettoyage GHCR)" as Cleanup {
+  component "Si un job a échoué → delete image"
+  component "Sinon → rien à faire"
+}
+
+' ===================================================================
+' RELATIONS (workflow order)
+' ===================================================================
+Build --> SAST
+SAST --> ImageBuild
+ImageBuild --> ImageScan
+ImageScan --> Publish
+Publish --> Deploy
+Deploy --> Cleanup
+
+@enduml

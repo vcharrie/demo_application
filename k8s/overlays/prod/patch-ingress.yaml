@@ -1,0 +1,3 @@
+spec:
+  rules:
+    - host: coreservice.mydomain.com

@@ -1,0 +1,69 @@
+@startuml
+title Architecture Fonctionnelle – CoreService V2
+
+actor "Client HTTP" as Client
+actor "Système de supervision" as Monitoring
+
+rectangle "CoreService API (Container Docker)" as API {
+
+  rectangle "Fonctionnalités Exposées" as Features {
+
+    usecase "Health Check Applicatif\nGET /api/health" as U1
+    usecase "Health Check Technique\nGET /actuator/health" as U2
+
+    usecase "Lister les ressources\nGET /resources" as U3
+    usecase "Lire une ressource\nGET /resources/{id}" as U4
+    usecase "Supprimer une ressource\nDELETE /resources/{id}" as U5
+
+    usecase "Créer une ressource\nPOST /resources\n(non fonctionnel en V2)" as U6
+  }
+}
+
+' --- Flux fonctionnels ---
+
+Client --> U1 : GET /api/health
+Monitoring --> U2 : GET /actuator/health
+
+Client --> U3 : GET /resources
+Client --> U4 : GET /resources/{id}
+Client --> U5 : DELETE /resources/{id}
+Client --> U6 : POST /resources
+
+' --- Notes explicatives ---
+
+note right of U1
+  Retourne :
+  {
+    "version": "v2",
+    "status": "UP"
+  }
+end note
+
+note right of U2
+  Retourne l'état technique Spring Boot :
+  - status: "UP"
+end note
+
+note right of U3
+  Retourne la liste des ressources :
+  - [] si aucune ressource
+end note
+
+note right of U4
+  Si id inconnu :
+  - 404 texte brut : "Resource not found"
+end note
+
+note right of U5
+  Si id inconnu :
+  - 404 texte brut
+  Si ressource existante :
+  - suppression définitive
+end note
+
+note right of U6
+  Fonctionnalité présente mais non opérationnelle en V2 :
+  - renvoie systématiquement 500
+end note
+
+@enduml

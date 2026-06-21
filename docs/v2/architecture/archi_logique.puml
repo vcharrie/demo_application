@@ -1,0 +1,62 @@
+@startuml
+title Architecture Logique – CoreService V2
+
+package "Couche API" as API {
+  component "HealthController" as HealthController
+  component "ResourceController" as ResourceController
+  component "GlobalExceptionHandler" as ExceptionHandler
+}
+
+package "Couche Application" as APP {
+  component "ResourceServiceImpl\n(Logique métier)" as ServiceImpl
+}
+
+package "Couche Domaine" as DOMAIN {
+  component "Resource\n(Entité métier)" as DomainEntity
+  component "Exceptions métier\n(NotFound / Conflict)" as DomainExceptions
+  component "ResourceService\n(Interface)" as DomainService
+}
+
+package "Couche Infrastructure" as INFRA {
+  component "ResourceRepository\n(stockage en mémoire)" as Repository
+  component "ResourceEntity\n(entité de stockage)" as InfraEntity
+  component "ResourceMapper\n(Domaine ↔ Infra)" as InfraMapper
+}
+
+package "Couche Configuration" as CFG {
+  component "Configuration\n(application.properties)" as Config
+  component "Auto-configuration\n(Spring Boot)" as AutoConfig
+}
+
+package "Couche Tests" as TESTS {
+  component "Tests Unitaires" as UnitTests
+  component "Tests Intégration Internes" as IntTests
+}
+
+' Flux logiques internes
+HealthController --> ServiceImpl
+ResourceController --> ServiceImpl
+
+ServiceImpl --> DomainService
+ServiceImpl --> Repository
+Repository --> InfraMapper
+InfraMapper --> InfraEntity
+
+ServiceImpl --> DomainEntity
+ServiceImpl --> DomainExceptions
+
+ServiceImpl --> Config
+ServiceImpl --> AutoConfig
+
+' Tests
+UnitTests --> HealthController
+UnitTests --> ResourceController
+UnitTests --> ServiceImpl
+
+IntTests --> HealthController
+IntTests --> ResourceController
+IntTests --> ServiceImpl
+IntTests --> Repository
+IntTests --> Config
+
+@enduml

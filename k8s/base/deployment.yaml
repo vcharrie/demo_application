@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coreservice
+  labels:
+    app: coreservice
+spec:
+  selector:
+    matchLabels:
+      app: coreservice
+  template:
+    metadata:
+      labels:
+        app: coreservice
+    spec:
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: coreservice
+          image: coreservice:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp

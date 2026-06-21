@@ -1,0 +1,197 @@
+# SEC-APP-02 — Cloisonnement applicatif & Gestion des erreurs
+
+**Domaine :** Application / Architecture interne  
+**Couche :** API / Application / Domaine / Infrastructure  
+**Statut :** 🟧 Implémenté (partiel — V2)
+
+---
+
+## 1. Risque
+
+### Menace
+
+Sans cloisonnement applicatif ni gestion centralisée des erreurs, une application expose :
+
+- des détails internes (stack traces, messages techniques, classes Java)
+- des entités internes non destinées à l’API
+- des comportements incohérents en cas d’erreur
+- des points d’injection potentiels (données non filtrées, absence de validation)
+
+Une erreur non gérée peut révéler des informations sensibles sur :
+
+- la structure interne du code
+- les dépendances
+- les technologies utilisées
+- les chemins d’exécution
+- les données manipulées
+
+### Vecteurs
+
+| Vecteur | Exemple concret |
+|---|---|
+| Erreur non gérée | Stack trace exposée dans la réponse HTTP |
+| Couplage API ↔ Domaine | Exposition d’attributs internes via sérialisation automatique |
+| Absence de DTO | Injection de champs inattendus dans le domaine |
+| Absence de gestion d’erreurs | Codes HTTP incohérents, comportements imprévisibles |
+| Absence de validation | Données malformées pouvant provoquer des exceptions |
+
+### Impact
+
+| Dimension | Conséquence |
+|---|---|
+| **Confidentialité** | Fuite d’informations internes (stack trace, structure du domaine) |
+| **Intégrité** | Données invalides injectées dans le domaine |
+| **Disponibilité** | Crash applicatif en cas d’erreur non gérée |
+| **Surface d’attaque** | Augmentation des vecteurs d’exploitation |
+
+### Références
+
+- OWASP ASVS — V1 Architecture
+- OWASP API Security — API7:2019 (Security Misconfiguration)
+- CWE‑209 : Information Exposure Through an Error Message
+- NIST SSDF — PW.9 (Error Handling)
+
+---
+
+## 2. Mesures de sécurité
+
+| Mesure | Type | Principe |
+|---|---|---|
+| Architecture en couches | Préventif | Séparation API / Application / Domaine / Infrastructure |
+| DTO + mappers API | Préventif | Contrôle des données exposées et reçues |
+| Exceptions métier dédiées | Préventif | Erreurs contrôlées, sans détails techniques |
+| Gestion centralisée des erreurs | Détectif / Préventif | Réponses cohérentes, pas de stack trace |
+| Mappers infrastructure | Préventif | Isolation entre domaine et stockage |
+| Tests d’intégration | Détectif | Vérification du comportement en cas d’erreur |
+
+---
+
+## 3. Implémentation (V2)
+
+### 3.1. Architecture en couches
+
+Principe : cloisonner les responsabilités pour éviter la fuite de détails internes.
+
+```
+api/
+  controller/
+  dto/
+  mapper/
+
+application/
+  service/
+
+domain/
+  model/
+  exception/
+
+infrastructure/
+  entity/
+  mapper/
+  repository/
+```
+
+Effets sécurité :
+
+- aucune entité interne n’est exposée directement
+- l’API ne manipule jamais les objets du domaine
+- le domaine ne dépend pas de la persistance
+- les données exposées sont strictement contrôlées via DTO
+
+---
+
+### 3.2. DTO + Mappers API
+
+Principe : empêcher la sérialisation automatique d’entités internes.
+
+Exemple :
+
+```java
+public class ResourceRequest {
+    private String id;
+    private String name;
+    private String description;
+}
+```
+
+Mapper API :
+
+```java
+public Resource toDomain(ResourceRequest request) {
+    return new Resource(request.getId(), request.getName(), request.getDescription());
+}
+```
+
+Effets sécurité :
+
+- contrôle explicite des champs exposés
+- impossibilité d’injecter des champs inattendus
+- réduction de la surface d’attaque
+
+---
+
+### 3.3. Exceptions métier dédiées
+
+Localisation : `domain.exception`
+
+- `ResourceNotFoundException`
+- `ResourceConflictException`
+
+Effets sécurité :
+
+- aucune fuite de détails techniques
+- messages fonctionnels uniquement
+- codes HTTP cohérents
+
+---
+
+### 3.4. Gestion centralisée des erreurs
+
+Localisation : `api.exception.GlobalExceptionHandler`
+
+Exemple :
+
+```java
+@ExceptionHandler(ResourceNotFoundException.class)
+public ResponseEntity<String> handleNotFound(ResourceNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+}
+```
+
+Effets sécurité :
+
+- pas de stack trace dans les réponses
+- pas d’exposition de classes internes
+- comportement maîtrisé en cas d’erreur
+
+---
+
+### 3.5. Tests d’intégration
+
+Les tests `ResourceControllerIT` et `HealthControllerTest` valident :
+
+- les codes HTTP attendus
+- l’absence de stack trace dans les réponses
+- la cohérence fonctionnelle en cas d’erreur
+
+---
+
+## 4. Limites & Résiduel
+
+| Limite | Impact | Amélioration envisagée |
+|---|---|---|
+| Pas de Spring Security | Aucune authentification / autorisation | V3 |
+| Pas de sanitizing des logs | Risque de fuite dans les logs | V3 |
+| Erreurs en texte brut | Pas de format JSON standardisé | V3 |
+| Pas de validation d’entrée | Risque d’injection de données invalides | V3 |
+| Pas de masquage de données sensibles | Risque d’exposition indirecte | V3 |
+| Pas de filtrage HTTP | Surface d’attaque plus large | V3 |
+
+---
+
+## Références croisées
+
+- SEC-DEP-01 — Gestion des dépendances
+- SEC-CI-01 — Sécurisation du pipeline CI/CD
+- SEC-CI-03 — Provenance & intégrité supply chain
+- SEC-SCA-01 — Analyse des dépendances (Trivy)

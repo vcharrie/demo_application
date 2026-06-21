@@ -1,0 +1,110 @@
+@startuml
+title Architecture locale Kubernetes (kind) — Node container + Processus + containerd + Pods
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+' ============================
+' COTE CLIENT
+' ============================
+package "Client (Windows)" {
+
+  folder "Overlay local" as Overlay {
+    component "deployment.yaml"
+    component "service.yaml"
+    component "ingress.yaml"
+    component "sealedsecret.yaml"
+    component "kustomization.yaml"
+  }
+
+  component Kustomize as "Kustomize\n(génère les manifests)"
+  component Kubectl as "kubectl apply -k"
+
+  Overlay --> Kustomize
+  Kustomize --> Kubectl
+}
+
+' ============================
+' CLUSTER KIND
+' ============================
+node "Docker Desktop" {
+
+  node "Container Docker : kind-control-plane\n(Node Kubernetes complet)" as NodeContainer {
+
+    ' --- Processus système ---
+    package "Processus système (dans le container)" {
+      component APIServer as "kube-apiserver\n(processus)"
+      component Scheduler as "kube-scheduler\n(processus)"
+      component Controller as "kube-controller-manager\n(processus)"
+      component Etcd as "etcd\n(processus, stocke les objets)"
+      component Kubelet as "kubelet\n(processus)"
+    }
+
+    ' --- containerd ---
+    package "containerd (runtime dans le container)" as CRI {
+
+      ' --- Pods natifs ---
+      package "Pods natifs" {
+        node "Pod kube-proxy" {
+          component KubeProxy as "Container: kube-proxy"
+        }
+        node "Pod coredns" {
+          component CoreDNS as "Container: coredns"
+        }
+      }
+
+      ' --- Pods d'infrastructure ---
+      package "Pods d'infrastructure" {
+        node "Pod ingress-nginx-controller" {
+          component IngressCtrl as "Container: nginx-ingress-controller"
+        }
+        node "Pod sealed-secrets-controller" {
+          component SealedCtrl as "Container: sealed-secrets-controller"
+        }
+      }
+
+      ' --- Application ---
+      package "Application coreservice" {
+        node "Pod coreservice" {
+          component App as "Container: coreservice (Spring Boot)"
+        }
+
+        component Svc as "Service coreservice\n(objet stocké dans etcd)"
+        component Ing as "Ingress coreservice\n(objet stocké dans etcd)"
+        component SealedObj as "SealedSecret\n(objet stocké dans etcd)"
+        component SecretObj as "Secret imagePullSecret\n(objet stocké dans etcd)"
+      }
+    }
+  }
+}
+
+' ============================
+' RELATIONS
+' ============================
+
+Kubectl --> APIServer : "apply manifests"
+APIServer --> Etcd : "stockage des objets"
+
+SealedObj --> SealedCtrl : "déchiffrement"
+SealedCtrl --> SecretObj : "création du Secret"
+
+Ing --> IngressCtrl : "règles HTTP"
+IngressCtrl --> Svc : "reverse proxy"
+
+Svc --> KubeProxy : "routage"
+KubeProxy --> App : "trafic vers le Pod"
+
+CoreDNS --> App : "DNS interne"
+
+Scheduler --> App
+Controller --> App
+Kubelet --> App
+
+APIServer --> Scheduler
+APIServer --> Controller
+APIServer --> Kubelet
+APIServer --> KubeProxy
+APIServer --> IngressCtrl
+APIServer --> SealedCtrl
+
+@enduml

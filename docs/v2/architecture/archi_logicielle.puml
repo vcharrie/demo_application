@@ -1,0 +1,38 @@
+@startuml
+title Architecture Logicielle – CoreService V2 (Packaging Spring Boot)
+
+' --- Socle d'exécution ---
+rectangle "Socle d'exécution\n(JRE 21)" as Runtime
+
+' --- Application packagée ---
+rectangle "CoreServiceApplication.jar\n(Package Spring Boot complet)" as Jar {
+
+  rectangle "Code Applicatif" as Code {
+    component "HealthController"
+    component "ResourceController"
+  }
+
+  rectangle "Dépendances Spring Boot" as SpringDeps {
+    component "Spring Boot 4.0.3"
+    component "Spring Web MVC"
+    component "Spring Boot Actuator"
+    component "Auto-configurations"
+  }
+}
+
+' --- Tests séparés ---
+rectangle "Artefacts de test\n(non inclus dans le jar)" as Tests {
+  component "Tests unitaires"
+  component "Tests d'intégration"
+}
+
+' --- Build Maven externe ---
+rectangle "Build & Packaging Maven" as Build {
+  component "Maven\n(spring-boot-maven-plugin)"
+}
+
+Build --> Jar : Génère\nle package complet
+Tests --> Build : Exécutés\nlors du build
+Jar -down- Runtime : S'exécute sur
+
+@enduml

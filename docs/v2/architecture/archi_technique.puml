@@ -1,0 +1,57 @@
+@startuml
+title Architecture Technique – CoreService V2 (Optimisée)
+
+' ============================
+'   BLOC 1 : POSTE DEV LOCAL
+' ============================
+node "Poste Développeur\nWindows 10/11" as Dev {
+
+  node "Docker Desktop\n(Moteur Docker)" as DockerLocal {
+    component "Container CoreService\n(Image Runtime JRE 21)" as LocalContainer
+  }
+
+  component "Postman\n(Appels REST)" as Postman
+  component "Git (CLI / GUI)" as GitLocal
+}
+
+' ============================
+'   BLOC 2 : REGISTRY GHCR
+' ============================
+cloud "GitHub Container Registry (GHCR)" as GHCR {
+  component "Image Docker\ncoreservice:latest" as ImageGHCR
+}
+
+' ============================
+'   BLOC 3 : GITHUB ACTIONS (CI/CD)
+' ============================
+node "GitHub Actions\n(Cloud CI/CD)" as CI {
+
+  node "VM GitHub Actions\n(Ubuntu Runner)" as Runner {
+    component "Moteur Docker\n(préinstallé)" as DockerCI
+    component "Pipeline CI/CD\n(build → test → image → push)" as Pipeline
+  }
+
+  component "Repository Git" as Repo
+}
+
+' ============================
+'   FLUX TECHNIQUES
+' ============================
+
+' --- Flux Dev ---
+Postman --> LocalContainer : Requêtes HTTP/REST
+LocalContainer --> Postman : Réponses JSON
+
+GitLocal --> Repo : Push / Pull / PR
+Repo --> GitLocal : Code / Historique
+
+' --- Flux CI/CD ---
+Repo --> Pipeline : Déclenchement CI\nsur push/PR
+Pipeline --> DockerCI : Build Dockerfile\nmulti-stage
+DockerCI --> ImageGHCR : Push image\ncoreservice:latest
+
+' --- Flux Exécution Locale ---
+ImageGHCR --> DockerLocal : Pull image\ncoreservice:latest
+DockerLocal --> LocalContainer : Démarrage container
+
+@enduml

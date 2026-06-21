@@ -1,0 +1,51 @@
+@startuml
+title Architecture Logicielle – CoreService V3 (Vue Globale)
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ============================================================
+' 1. SOCLE LOGICIEL (runtime)
+' ============================================================
+rectangle "Socle Logiciel\nJRE 21 (Temurin)" as JRE {
+}
+
+' ============================================================
+' 2. APPLICATION (JAR Spring Boot)
+' ============================================================
+rectangle "CoreServiceApplication.jar\n(Spring Boot 3.4.13)" as Jar {
+
+  rectangle "Code Applicatif" as Code {
+    component "Controllers\n(REST API)"
+    component "Services\n(Logique métier)"
+    component "Entities / DTO"
+  }
+
+  rectangle "Dépendances Spring Boot" as SpringDeps {
+    component "Spring Web"
+    component "Spring Boot Actuator"
+    component "Spring Data JPA"
+    component "Spring Validation"
+    component "Spring Security"
+  }
+
+  rectangle "Configuration Applicative" as Config {
+    component "application.yml"
+    component "Profiles (ci, dev)"
+  }
+}
+
+' ============================================================
+' 3. CONTENEUR (vue logicielle, sans Docker)
+' ============================================================
+rectangle "Conteneur Applicatif\n(CoreService – runtime)" as Container {
+}
+
+' ============================================================
+' RELATIONS
+' ============================================================
+JRE --> Jar : Exécute\nle JAR Spring Boot
+Jar --> Container : Emballé dans\nle conteneur applicatif
+
+@enduml
