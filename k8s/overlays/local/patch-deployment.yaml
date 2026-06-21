@@ -11,3 +11,12 @@ spec:
       containers:
         - name: coreservice
           image: ghcr.io/vcharrie/coreservice:3961bd822fd57171c58431f93a5f1b4a78f2fe89
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault

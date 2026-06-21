@@ -11,3 +11,5 @@ resources:
 patchesStrategicMerge:
   - patch-deployment.yaml
   - patch-ingress.yaml
+  - patch-probes.yaml
+  - patch-resources.yaml

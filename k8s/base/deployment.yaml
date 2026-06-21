@@ -13,8 +13,14 @@ spec:
       labels:
         app: coreservice
     spec:
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: coreservice
           image: coreservice:latest
           ports:
             - containerPort: 8080
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp

@@ -1,0 +1,17 @@
+# k8s/overlays/local/patch-resources.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coreservice
+spec:
+  template:
+    spec:
+      containers:
+        - name: coreservice
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
