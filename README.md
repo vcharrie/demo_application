@@ -136,8 +136,8 @@ Les pipelines sont visibles dans `.github/workflows/`.
 ## 📚 7. Documentation
 
 ### 🔹 Documents transverses
-- Document recruteur : [`/docs/doc-recruteur.md`](docs/doc-recruteur.md)  
-- Document chapeau : [`/docs/doc-chapeau.md`](docs/doc-chapeau.md)
+- Document recruteur : [`/docs/doc_recruteur.md`](docs/doc-recruteur.md)  
+- Document chapeau : [`/docs/doc_chapeau.md`](docs/doc-chapeau.md)
 
 ### 🔹 Documentation versionnée
 
