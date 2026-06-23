@@ -136,8 +136,8 @@ Les pipelines sont visibles dans `.github/workflows/`.
 ## 📚 7. Documentation
 
 ### 🔹 Documents transverses
-- Document recruteur : [`/docs/doc-recruteur.md`](docs/doc-recruteur.md)  
-- Document chapeau : [`/docs/doc-chapeau.md`](docs/doc-chapeau.md)
+- Document recruteur : [`/docs/doc_recruteur.md`](docs/doc-recruteur.md)  
+- Document chapeau : [`/docs/doc_chapeau.md`](docs/doc-chapeau.md)
 
 ### 🔹 Documentation versionnée
 
@@ -180,10 +180,10 @@ La documentation détaillée est organisée **par version**, afin de refléter l
 ## 👤 8. À propos de moi
 
 👉 **Présentation courte (pitch professionnel)**  
-[`/about/about.md`](about/about.md)
+[À propos de moi](https://github.com/vcharrie/vcharrie/blob/main/presentation.md)
 
 👉 **CV & documents complets**  
-[`/about/`](about/)
+[`cv`](https://github.com/vcharrie/vcharrie/blob/main/cv/)
 
 ---
 
@@ -191,7 +191,7 @@ La documentation détaillée est organisée **par version**, afin de refléter l
 
 - **Email** : charrier_vincent@proton.me  
 - **LinkedIn** : https://www.linkedin.com/in/vincentcharrier/  
-- **GitHub** : https://github.com/xxxx  
+- **GitHub** : https://github.com/vcharrie/  
 
 ---
 

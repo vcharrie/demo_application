@@ -1,6 +1,6 @@
 @startuml
-title Architecture Docker – CoreService V3
-subtitle Structure interne de l’image durcie (runtime-only)
+title Architecture Docker - CoreService V3
+
 
 skinparam rectangleStyle rounded
 skinparam shadowing false
@@ -22,22 +22,22 @@ rectangle "Application" as App {
 
   component "/app/app.jar\n(CoreServiceApplication.jar)" as Jar
   component "Spring Boot 3.4.13\n(Web, Actuator, JPA, Security)" as Spring
-  component "Configuration embarquée\n(application.yml)" as Config
+  component "Configuration embarquee\n(application.yml)" as Config
 }
 
 ' ============================================================
-' 3. SÉCURISATION DE L’IMAGE
+' 3. SECURISATION DE L'IMAGE
 ' ============================================================
-rectangle "Durcissement de l’image" as Hardening {
+rectangle "Durcissement de l'image" as Hardening {
 
   component "USER 10001\n(non-root)" as User
   component "Filesystem read-only" as ReadOnly
-  component "Répertoire /app\npermissions restreintes" as AppDir
+  component "Repertoire /app\npermissions restreintes" as AppDir
   component "Labels OCI\n(org.opencontainers.image.*)" as Labels
 }
 
 ' ============================================================
-' 4. EXÉCUTION
+' 4. EXECUTION
 ' ============================================================
 rectangle "Entrypoint & Command" as Exec {
 
@@ -49,8 +49,8 @@ rectangle "Entrypoint & Command" as Exec {
 ' ============================================================
 ' RELATIONS
 ' ============================================================
-Base --> App : COPY app.jar\n+ dépendances
+Base --> App : COPY app.jar\n+ dependances
 App --> Hardening : Application\n+ durcissement
-Hardening --> Exec : Image prête\nà l’exécution
+Hardening --> Exec : Image prete\n a l'execution
 
 @enduml
