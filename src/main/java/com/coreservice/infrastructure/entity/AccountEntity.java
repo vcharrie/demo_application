@@ -23,6 +23,10 @@ public class AccountEntity {
     @Enumerated(EnumType.STRING)
     private AccountStatus status;
 
+    //Obligatoire pour Hibernate
+    protected AccountEntity() {
+    }
+
     public AccountEntity(UUID id, UUID ownerId, BigDecimal balance, AccountStatus status) {
         this.id = id;
         this.ownerId = ownerId;
