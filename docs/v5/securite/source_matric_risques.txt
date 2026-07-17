@@ -1,0 +1,24 @@
+Release;Exigence / Mesure;Risque couvert;Referentiel
+V1;Gestion Git;Code non maitrise / separation;NIST SSDF PW.1 / OWASP ASVS V1
+V1;Build automatise;Build non reproductible / pipeline absent;NIST SSDF PW.8 / CNCF Supply Chain
+V1;Tests unitaires;Regression non detectee;NIST SSDF PW.9
+V1;Tests integration internes;Regression / separation;OWASP ASVS V1
+V1;Tests integration externes;Regression / integrite;OWASP ASVS V1 / NIST SSDF PW.9
+V1;Actuator health;Non observabilite;OWASP ASVS V7 / CNCF Observability
+V1;API health;Non observabilite / integrite;OWASP ASVS V7
+
+V2;Architecture en couches;Fuite d infos / injection;OWASP ASVS V1 / API7:2019
+V2;DTO + mappers;Injection / exposition interne;OWASP ASVS V5
+V2;Exceptions metier;Fuite d infos techniques;CWE-209 / OWASP ASVS V1
+V2;Gestion centralisee des erreurs;Stack trace / incoherence;CWE-209 / NIST SSDF PW.9
+V2;Tests d integration;Validation comportement;NIST SSDF PW.9
+
+V5;SEC-VAL-01 - Validation entree backend;RISK-VAL-01 / RISK-INT-01;OWASP ASVS V5 / NIST SP 800-53 SI-10
+V5;SEC-AUTHZ-01 - Blocage comptes suspendus;RISK-LOG-01;OWASP ASVS V4
+V5;SEC-IMMUT-01 - Immutabilite operations validees;RISK-INT-02;NIST SP 800-53 AU-9
+V5;SEC-TXN-01 - Gestion double depense;RISK-LOG-02;OWASP ASVS V10 / NIST SP 800-53 SC-28
+V5;SEC-AUTHZ-02 - Validation virements eleves;RISK-AUTHZ-01;NIST SP 800-63 / OWASP ASVS V4
+V5;SEC-AUDIT-01 - Historisation obligatoire;RISK-AUDIT-01;NIST SP 800-53 AU-2
+V5;SEC-WORKFLOW-01 - Workflow strict;RISK-LOG-03;OWASP ASVS V4
+V5;SEC-VAL-02 - Interdiction auto-virement;RISK-LOG-04;OWASP ASVS V5
+V5;SEC-VAL-03 - Verification statut compte destination;RISK-LOG-05;OWASP ASVS V5

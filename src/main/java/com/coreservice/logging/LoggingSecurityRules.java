@@ -2,6 +2,7 @@ package com.coreservice.logging;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,10 +42,10 @@ public final class LoggingSecurityRules {
         }
 
         return input.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        e -> sanitize(e.getKey(), e.getValue())
-                ));
+            .collect(Collectors.toMap(
+                e -> Objects.requireNonNull(e.getKey()),
+                e -> sanitize(e.getKey(), e.getValue())
+        ));
     }
 }
 

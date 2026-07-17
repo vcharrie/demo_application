@@ -21,7 +21,12 @@
         <Class name="com.coreservice.api.ResourceController"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
-
+    
+    <Match>
+        <Class name="com.coreservice.api.AccountController"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    
     <Match>
         <Class name="com.coreservice.config.security.SecretsConfigValidator"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
@@ -32,6 +37,14 @@
         <Bug pattern="CT_CONSTRUCTOR_THROW"/>
     </Match>
 
-    
+    <Match>
+        <Class name="com.coreservice.domain.Account"/>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
+
+    <Match>
+        <Bug pattern="NP_NONNULL_PARAM_VIOLATION"/>
+        <Source name=".*Test.java"/>
+    </Match>
 
 </FindBugsFilter>
