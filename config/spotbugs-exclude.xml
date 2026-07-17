@@ -21,7 +21,12 @@
         <Class name="com.coreservice.api.ResourceController"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
-
+    
+    <Match>
+        <Class name="com.coreservice.api.AccountController"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    
     <Match>
         <Class name="com.coreservice.config.security.SecretsConfigValidator"/>
         <Bug pattern="EI_EXPOSE_REP2"/>
