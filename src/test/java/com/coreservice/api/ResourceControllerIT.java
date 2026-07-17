@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Base64;
+import java.util.Objects;
 
 @Import(TestUsersConfig.class)
 @SpringBootTest
@@ -38,8 +39,8 @@ class ResourceControllerIT {
         mockMvc.perform(
                 post("/resources")
                     .header("Authorization", "Basic " + basic)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(mapper.writeValueAsString(request))
+                    .contentType(Objects.requireNonNull(MediaType.APPLICATION_JSON))
+                    .content(Objects.requireNonNull(mapper.writeValueAsString(request)))
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("Test"));
@@ -53,8 +54,9 @@ class ResourceControllerIT {
 
         mockMvc.perform(post("/resources")
                         .header("Authorization", "Basic " + basic)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(request)))
+                    .contentType(Objects.requireNonNull(MediaType.APPLICATION_JSON))
+                    .content(Objects.requireNonNull(mapper.writeValueAsString(request)))
+            )
                 .andExpect(status().isBadRequest());
     }
 

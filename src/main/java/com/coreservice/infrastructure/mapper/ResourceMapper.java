@@ -5,12 +5,15 @@ import java.util.UUID;
 import com.coreservice.domain.Resource;
 import com.coreservice.infrastructure.entity.ResourceEntity;
 
+import io.micrometer.common.lang.NonNull;
+
 public final class ResourceMapper {
 
     private ResourceMapper() {
     }
 
-    public static ResourceEntity toEntity(Resource resource) {
+    @NonNull 
+    public static ResourceEntity toEntity(@NonNull Resource resource) {
         UUID id = null;
         if (resource.getId() != null) {
             id = UUID.fromString(resource.getId());

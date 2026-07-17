@@ -37,13 +37,13 @@ class ResourceServiceImplTest {
         Resource resource = new Resource(randomUuid.toString(), "Test", "desc");
 
         when(repository.findByName("Test")).thenReturn(Optional.empty());
-        when(repository.save(any()))
+        when(repository.save(any(ResourceEntity.class)))
                 .thenReturn(new ResourceEntity(randomUuid, "Test", "desc"));
 
         Resource result = service.create(resource);
 
         assertThat(result.getId()).isEqualTo(randomUuid.toString());
-        verify(repository).save(any());
+        verify(repository).save(any(ResourceEntity.class));
     }
 
     @Test

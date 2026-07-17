@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -28,7 +29,7 @@ public class ResourceServiceImpl implements ResourceService {
         repository.findByName(resource.getName())
                 .ifPresent(r -> { throw new ResourceConflictException(resource.getName()); });
 
-        var entity = ResourceMapper.toEntity(resource);
+        var entity = Objects.requireNonNull(ResourceMapper.toEntity(resource));
         var saved = repository.save(entity);
 
         return ResourceMapper.toDomain(saved);
@@ -54,6 +55,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public void delete(String id) {
+        Objects.requireNonNull(id, "id must not be null");
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException(id);
         }
