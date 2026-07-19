@@ -1,8 +1,8 @@
 package com.coreservice.application;
 
+import com.coreservice.application.exception.ResourceConflictException;
+import com.coreservice.application.exception.ResourceNotFoundException;
 import com.coreservice.domain.Resource;
-import com.coreservice.domain.exception.ResourceConflictException;
-import com.coreservice.domain.exception.ResourceNotFoundException;
 import com.coreservice.infrastructure.entity.ResourceEntity;
 import com.coreservice.infrastructure.repository.ResourceRepository;
 import org.junit.jupiter.api.BeforeEach;

@@ -32,7 +32,10 @@ class AuditServiceImplTest {
         UUID id = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
 
-        Account account = new Account(id, ownerId, BigDecimal.TEN);
+        Account account = new Account(
+                ownerId,
+                BigDecimal.TEN
+        );
 
         ArgumentCaptor<AuditEventEntity> captor = ArgumentCaptor.forClass(AuditEventEntity.class);
 

@@ -3,7 +3,8 @@ package com.coreservice.api;
 import com.coreservice.api.dto.ResourceRequest;
 import com.coreservice.api.dto.ResourceResponse;
 import com.coreservice.api.mapper.ResourceApiMapper;
-import com.coreservice.domain.ResourceService;
+import com.coreservice.application.ResourceService;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 

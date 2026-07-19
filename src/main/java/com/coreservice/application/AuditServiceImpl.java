@@ -1,11 +1,13 @@
 package com.coreservice.application;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.coreservice.domain.Account;
 import com.coreservice.domain.AuditEvent;
-import com.coreservice.domain.AuditService;
 import com.coreservice.infrastructure.entity.AuditEventEntity;
 import com.coreservice.infrastructure.mapper.AuditMapper;
 import com.coreservice.infrastructure.repository.AuditRepository;
@@ -35,4 +37,17 @@ public class AuditServiceImpl implements AuditService {
 
         auditRepository.save(entity);
     }
+
+    @Override
+    public void recordCredit(Account account, BigDecimal amount) {
+        AuditEvent entry = new AuditEvent(
+                "ACCOUNT_CREDITED",
+                "Credit of " + amount + " applied to account" + account.getId() + " at " + Instant.now()
+        );
+
+        AuditEventEntity entity = AuditMapper.toEntity(entry);
+
+        auditRepository.save(entity);
+    }
+
 }   

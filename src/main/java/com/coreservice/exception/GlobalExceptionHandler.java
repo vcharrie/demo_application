@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import com.coreservice.domain.exception.ResourceNotFoundException;
+import com.coreservice.application.exception.FunctionalError;
+import com.coreservice.application.exception.FunctionalException;
+import com.coreservice.application.exception.ResourceNotFoundException;
+import com.coreservice.domain.exception.BusinessException;
 
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
@@ -114,6 +117,36 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .header("errorResponse", "not_found")
                 .body(Map.of("error", "NOT_FOUND"));
+    }
+
+    // 3. Erreurs fonctionnelles (ex : ACCOUNT_NOT_FOUND → 404)
+    @ExceptionHandler(FunctionalException.class)
+    public ResponseEntity<Object> handleFunctional(FunctionalException ex) {
+
+        if (ex.getError() == FunctionalError.ACCOUNT_NOT_FOUND) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(
+                            "error", ex.getError().name(),
+                            "message", ex.getMessage()
+                    ));
+        }
+
+        // Autres erreurs fonctionnelles → 400
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", ex.getError().name(),
+                        "message", ex.getMessage()
+                ));
+    }
+
+    // 4. Erreurs métier (ex : ACCOUNT_SUSPENDED → 409)
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<Object> handleBusiness(BusinessException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", ex.getError().name(),
+                        "message", ex.getMessage()
+                ));
     }
 
 

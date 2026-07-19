@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -226,5 +227,85 @@ class AccountControllerIT {
             )
             .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void depositShouldReturn200AndUpdateBalance() throws Exception {
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+        
+        // Arrange : créer un compte en base
+        UUID ownerId = UUID.randomUUID();
+        AccountEntity entity = new AccountEntity(null, ownerId, BigDecimal.ZERO, AccountStatus.ACTIVE);
+        AccountEntity entitySaved = repository.save(entity);
+
+        // Act + Assert
+        mockMvc.perform(post("/api/accounts/" + entitySaved.getId() + "/deposit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 10}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.balance").value(10));
+
+        // Vérification en base
+        AccountEntity updated = repository.findById(entitySaved.getId()).orElseThrow();
+        assertEquals(new BigDecimal("10.00"), updated.getBalance());
+    }
+
+    @Test
+    void depositShouldReturn400WhenAmountIsInvalid() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+
+        mockMvc.perform(post("/api/accounts/" + id + "/deposit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 0}
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    void depositShouldReturn404WhenAccountNotFound() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+
+        mockMvc.perform(post("/api/accounts/" + id + "/deposit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 10}
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void depositShouldReturn409WhenAccountSuspended() throws Exception {
+        // Arrange : compte suspendu
+        UUID id = UUID.randomUUID();
+        AccountEntity entity = new AccountEntity(  
+            null,
+            UUID.randomUUID(),
+            BigDecimal.ZERO,
+            AccountStatus.SUSPENDED
+        );
+
+        AccountEntity entitySaved = repository.save(entity);
+
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+
+        mockMvc.perform(post("/api/accounts/" + entitySaved.getId() + "/deposit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 10}
+                                """))
+                .andExpect(status().isConflict()); // ou 422 selon ton mapping
+    }
+
 
 }

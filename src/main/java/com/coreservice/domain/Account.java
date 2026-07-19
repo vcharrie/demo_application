@@ -3,9 +3,12 @@ package com.coreservice.domain;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.coreservice.domain.exception.BusinessError;
+import com.coreservice.domain.exception.BusinessException;
+
 public class Account {
 
-    private final UUID id;
+    private UUID id;
     private final UUID ownerId;
     private BigDecimal balance;
     private AccountStatus status;
@@ -17,17 +20,15 @@ public class Account {
         this.status = status != null ? status : AccountStatus.ACTIVE;
     }
 
-    public Account(UUID id, UUID ownerId, BigDecimal initialBalance) {
+    public Account(UUID ownerId, BigDecimal initialBalance) {
 
         if (ownerId == null) {
-            throw new IllegalArgumentException("Owner ID cannot be null");
+            throw new BusinessException(BusinessError.ACCOUNT_OWNER_ID_NULL, ownerId);
         }
-
         if (initialBalance == null || initialBalance.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Initial balance must be >= 0");
+            throw new BusinessException(BusinessError.AMOUNT_INVALID, initialBalance);
         }
 
-        this.id = id;
         this.ownerId = ownerId;
         this.balance = initialBalance;
         this.status = AccountStatus.ACTIVE;
@@ -48,9 +49,15 @@ public class Account {
     }
 
     public void credit(BigDecimal amount) {
+
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Credit amount must be > 0");
+            throw new BusinessException(BusinessError.AMOUNT_INVALID);
         }
+
+        if (this.isSuspended()) {
+            throw new BusinessException(BusinessError.ACCOUNT_SUSPENDED, this.id.toString());
+        }
+
         this.balance = this.balance.add(amount);
     }
 

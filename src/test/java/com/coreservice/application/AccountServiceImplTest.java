@@ -2,9 +2,12 @@ package com.coreservice.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,15 +16,16 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.coreservice.application.exception.FunctionalException;
+import com.coreservice.application.exception.ResourceNotFoundException;
 import com.coreservice.domain.Account;
 import com.coreservice.domain.AccountStatus;
-import com.coreservice.domain.AuditService;
-import com.coreservice.domain.exception.ConflictException;
-import com.coreservice.domain.exception.ResourceNotFoundException;
+import com.coreservice.domain.exception.BusinessException;
 import com.coreservice.infrastructure.entity.AccountEntity;
 import com.coreservice.infrastructure.repository.AccountRepository;
 
@@ -45,8 +49,6 @@ class AccountServiceImplTest {
         // Le repository ne doit pas signaler de conflit
         when(accountRepository.existsByOwnerId(ownerId)).thenReturn(false);
 
-
-
         Account result = accountService.createAccount(ownerId, initialBalance);
 
         // Vérifie que le repository a bien été appelé
@@ -55,14 +57,14 @@ class AccountServiceImplTest {
         // Vérifie le domaine retourné
         assertThat(result.getOwnerId()).isEqualTo(ownerId);
         assertThat(result.getBalance()).isEqualTo(initialBalance);
-        assertThat(result.getId()).isNotNull(); // UUID.randomUUID()
+        assertThat(result.getStatus()).isEqualTo(AccountStatus.ACTIVE);
     }
 
     @Test
     void shouldThrowIfOwnerIdIsNull() {
         assertThatThrownBy(() -> accountService.createAccount(null, BigDecimal.TEN))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Owner ID");
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("owner ID");
     }
 
     @Test
@@ -70,8 +72,8 @@ class AccountServiceImplTest {
         UUID ownerId = UUID.randomUUID();
 
         assertThatThrownBy(() -> accountService.createAccount(ownerId, null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Initial balance");
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Amount null");
     }
 
     @Test
@@ -79,8 +81,8 @@ class AccountServiceImplTest {
         UUID ownerId = UUID.randomUUID();
 
         assertThatThrownBy(() -> accountService.createAccount(ownerId, BigDecimal.valueOf(-1)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Initial balance");
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Amount -1 is invalid");
     }
 
     @Test
@@ -91,15 +93,15 @@ class AccountServiceImplTest {
         when(accountRepository.existsByOwnerId(ownerId)).thenReturn(true);
 
         assertThatThrownBy(() -> accountService.createAccount(ownerId, initialBalance))
-                .isInstanceOf(ConflictException.class)
+                .isInstanceOf(FunctionalException.class)
                 .hasMessageContaining("Account already exists");
     }
 
     @Test
     void shouldThrowIfIdIsNull() {
         assertThatThrownBy(() -> accountService.findById(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Account ID cannot be null");
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("id is marked non-null but is null");
     }
 
     @Test
@@ -109,8 +111,7 @@ class AccountServiceImplTest {
         when(accountRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> accountService.findById(id))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Account not found");
+                .isInstanceOf(FunctionalException.class);
     }
 
     @Test
@@ -172,8 +173,7 @@ class AccountServiceImplTest {
     @Test
     void shouldThrowIfIdIsNullInDelete() {
         assertThatThrownBy(() -> accountService.delete(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Account ID cannot be null");
+                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -183,8 +183,8 @@ class AccountServiceImplTest {
         when(accountRepository.existsById(id)).thenReturn(false);
 
         assertThatThrownBy(() -> accountService.delete(id))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Account not found");
+                .isInstanceOf(FunctionalException.class)
+                .hasMessageContaining("not found");
     }
 
     @Test
@@ -196,6 +196,51 @@ class AccountServiceImplTest {
         accountService.delete(id);
 
         verify(accountRepository).deleteById(id);
+    }
+
+    @Test
+    void depositShouldThrowFunctionalExceptionWhenAccountNotFound() {
+        UUID id = UUID.randomUUID();
+        BigDecimal amount = BigDecimal.TEN;
+
+        when(accountRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(
+                FunctionalException.class,
+                () -> accountService.deposit(id, amount)
+        );
+    }
+
+    @Test
+    void depositShouldCreditAccountAndPersistAndAudit() {
+        UUID id = UUID.randomUUID();
+        BigDecimal amount = BigDecimal.TEN;
+
+        AccountEntity entity = new AccountEntity(  
+            id,
+            UUID.randomUUID(),
+            BigDecimal.ZERO,
+            AccountStatus.ACTIVE
+        );
+
+        when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
+
+        // On capture l'entité sauvegardée
+        ArgumentCaptor<AccountEntity> captor = ArgumentCaptor.forClass(AccountEntity.class);
+
+        Account result = accountService.deposit(id, amount);
+
+        // Vérifie audit
+        verify(auditService).recordCredit(any(Account.class), eq(amount));
+
+        // Vérifie persistance
+        verify(accountRepository).save(captor.capture());
+
+        AccountEntity saved = captor.getValue();
+        assertEquals(new BigDecimal("10"), saved.getBalance());
+
+        // Vérifie retour
+        assertEquals(new BigDecimal("10"), result.getBalance());
     }
 
 }

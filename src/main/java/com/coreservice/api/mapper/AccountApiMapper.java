@@ -10,7 +10,6 @@ public final class AccountApiMapper {
 
     public static Account toDomain(AccountRequest request) {
         return new Account(
-                null, // ID généré par le domaine ou la persistence
                 request.ownerId(),
                 request.initialBalance()
         );
