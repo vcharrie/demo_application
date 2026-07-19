@@ -23,7 +23,7 @@ public class Account {
     public Account(UUID ownerId, BigDecimal initialBalance) {
 
         if (ownerId == null) {
-            throw new BusinessException(BusinessError.ACCOUNT_OWNER_ID_NULL, ownerId);
+            throw new BusinessException(BusinessError.ACCOUNT_OWNER_ID_NULL);
         }
         if (initialBalance == null || initialBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessException(BusinessError.AMOUNT_INVALID, initialBalance);
