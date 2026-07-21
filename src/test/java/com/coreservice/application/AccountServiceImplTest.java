@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,10 +22,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.coreservice.application.exception.FunctionalError;
 import com.coreservice.application.exception.FunctionalException;
-import com.coreservice.application.exception.ResourceNotFoundException;
 import com.coreservice.domain.Account;
 import com.coreservice.domain.AccountStatus;
+import com.coreservice.domain.exception.BusinessError;
 import com.coreservice.domain.exception.BusinessException;
 import com.coreservice.infrastructure.entity.AccountEntity;
 import com.coreservice.infrastructure.repository.AccountRepository;
@@ -121,13 +123,13 @@ class AccountServiceImplTest {
         BigDecimal balance = BigDecimal.TEN;
         AccountStatus status = AccountStatus.ACTIVE;
 
-        AccountEntity entity = new AccountEntity(id, ownerId, balance, status);
+        AccountEntity entity = new AccountEntity(ownerId, balance, status);
+
 
         when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
 
         Account account = accountService.findById(id);
 
-        assertThat(account.getId()).isEqualTo(id);
         assertThat(account.getOwnerId()).isEqualTo(ownerId);
         assertThat(account.getBalance()).isEqualTo(balance);
     }
@@ -150,8 +152,8 @@ class AccountServiceImplTest {
         UUID owner2 = UUID.randomUUID();
         AccountStatus status2 = AccountStatus.ACTIVE;
 
-        AccountEntity e1 = new AccountEntity(id1, owner1, BigDecimal.TEN, status1);
-        AccountEntity e2 = new AccountEntity(id2, owner2, BigDecimal.ONE, status2);
+        AccountEntity e1 = new AccountEntity(owner1, BigDecimal.TEN, status1);
+        AccountEntity e2 = new AccountEntity(owner2, BigDecimal.ONE, status2);
 
         when(accountRepository.findAll()).thenReturn(List.of(e1, e2));
 
@@ -160,12 +162,10 @@ class AccountServiceImplTest {
         assertThat(accounts).hasSize(2);
 
         // Vérifie le mapping du premier
-        assertThat(accounts.get(0).getId()).isEqualTo(id1);
         assertThat(accounts.get(0).getOwnerId()).isEqualTo(owner1);
         assertThat(accounts.get(0).getBalance()).isEqualTo(BigDecimal.TEN);
 
         // Vérifie le mapping du second
-        assertThat(accounts.get(1).getId()).isEqualTo(id2);
         assertThat(accounts.get(1).getOwnerId()).isEqualTo(owner2);
         assertThat(accounts.get(1).getBalance()).isEqualTo(BigDecimal.ONE);
     }
@@ -217,7 +217,6 @@ class AccountServiceImplTest {
         BigDecimal amount = BigDecimal.TEN;
 
         AccountEntity entity = new AccountEntity(  
-            id,
             UUID.randomUUID(),
             BigDecimal.ZERO,
             AccountStatus.ACTIVE
@@ -241,6 +240,67 @@ class AccountServiceImplTest {
 
         // Vérifie retour
         assertEquals(new BigDecimal("10"), result.getBalance());
+    }
+
+    @Test
+    void withdrawShouldThrowWhenAccountNotFound() {
+        UUID id = UUID.randomUUID();
+
+        when(accountRepository.findById(id)).thenReturn(Optional.empty());
+
+        FunctionalException ex = assertThrows(
+                FunctionalException.class,
+                () -> accountService.withdraw(id, new BigDecimal("10"))
+        );
+
+        assertEquals(FunctionalError.ACCOUNT_NOT_FOUND, ex.getError());
+    }
+
+    @Test
+    void withdrawShouldCallDomainAndPersistAndAudit() {
+        UUID id = UUID.randomUUID();
+
+        AccountEntity entity = new AccountEntity(
+                id,
+                new BigDecimal("100.00"),
+                AccountStatus.ACTIVE
+        );
+
+        when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
+
+        // Exécution
+        accountService.withdraw(id, new BigDecimal("30"));
+
+        // Vérification audit
+        verify(auditService, times(1))
+                .recordDebit(any(Account.class), eq(new BigDecimal("30")));
+
+        // Vérification persistance
+        ArgumentCaptor<AccountEntity> captor = ArgumentCaptor.forClass(AccountEntity.class);
+        verify(accountRepository, times(1)).save(captor.capture());
+
+        AccountEntity saved = captor.getValue();
+        assertEquals(new BigDecimal("70.00"), saved.getBalance());
+        assertEquals(AccountStatus.ACTIVE, saved.getStatus());
+    }
+
+    @Test
+    void withdrawShouldPropagateBusinessExceptionsFromDomain() {
+        UUID id = UUID.randomUUID();
+
+        AccountEntity entity = new AccountEntity(  UUID.randomUUID(),     
+                new BigDecimal("10.00"),
+                AccountStatus.ACTIVE
+        );
+
+        when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
+
+        BusinessException ex = assertThrows(
+                BusinessException.class,
+                () -> accountService.withdraw(id, new BigDecimal("50"))
+        );
+
+        assertEquals(BusinessError.ACCOUNT_INSUFFICIENT_FUNDS, ex.getError());
     }
 
 }

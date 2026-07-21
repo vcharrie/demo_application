@@ -3,6 +3,7 @@ package com.coreservice.application;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import com.coreservice.application.exception.FunctionalError;
 import com.coreservice.application.exception.FunctionalException;
@@ -96,9 +97,39 @@ public class AccountServiceImpl implements AccountService {
         // Historisation (audit)
         auditService.recordCredit(account, amount);
 
-        // Persistance
-        AccountEntity updated = AccountMapper.toEntity(account);
-        accountRepository.save(updated);
+        // 🔥 Mise à jour de l'entité JPA existante
+        entity.setBalance(account.getBalance());
+        entity.setStatus(account.getStatus());
+
+        accountRepository.save(entity);
+
+        return account;
+    }
+
+    /**
+     * UC03 — Retrait
+     */
+    @Transactional
+    @Override
+    public Account withdraw(@NonNull UUID  accountId, @NonNull BigDecimal amount) {
+
+        // Récupération du compte
+        AccountEntity entity = accountRepository.findById(accountId)
+                .orElseThrow(() -> new FunctionalException(FunctionalError.ACCOUNT_NOT_FOUND, accountId.toString()));
+
+        Account account = AccountMapper.toDomain(entity);
+
+        // Règles métier (montant, suspension, solde)
+        account.debit(amount);
+
+        // Historisation
+        auditService.recordDebit(account, amount);
+
+        // 🔥 Mise à jour de l'entité JPA existante
+        entity.setBalance(account.getBalance());
+        entity.setStatus(account.getStatus());
+
+        accountRepository.save(entity);
 
         return account;
     }

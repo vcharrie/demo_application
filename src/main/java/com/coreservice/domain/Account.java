@@ -51,7 +51,7 @@ public class Account {
     public void credit(BigDecimal amount) {
 
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException(BusinessError.AMOUNT_INVALID);
+            throw new BusinessException(BusinessError.AMOUNT_INVALID, amount);
         }
 
         if (this.isSuspended()) {
@@ -63,8 +63,17 @@ public class Account {
 
     public void debit(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Debit amount must be > 0");
+            throw new BusinessException(BusinessError.AMOUNT_INVALID, amount);
         }
+
+        if (this.isSuspended()) {
+            throw new BusinessException(BusinessError.ACCOUNT_SUSPENDED, this.id.toString());
+        } 
+
+        if (this.balance.compareTo(amount) < 0) {
+            throw new BusinessException(BusinessError.ACCOUNT_INSUFFICIENT_FUNDS, this.balance, amount);
+        }
+
         this.balance = this.balance.subtract(amount);
     }
 

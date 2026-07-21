@@ -116,10 +116,13 @@ class AccountControllerIT {
     void shouldReturnAllAccounts() throws Exception {
         String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
 
+        // Préparation : supprimer tous les comptes existants pour un test propre
+        repository.deleteAll();
+
         // Préparation : insérer des comptes en base
 
-        var acc1 = new AccountEntity(UUID.randomUUID(), UUID.randomUUID(), BigDecimal.valueOf(100), AccountStatus.ACTIVE);
-        var acc2 = new AccountEntity(UUID.randomUUID(), UUID.randomUUID(), BigDecimal.valueOf(200), AccountStatus.ACTIVE);
+        var acc1 = new AccountEntity(UUID.randomUUID(), BigDecimal.valueOf(100), AccountStatus.ACTIVE);
+        var acc2 = new AccountEntity(UUID.randomUUID(), BigDecimal.valueOf(200), AccountStatus.ACTIVE);
 
         repository.saveAll(List.of(acc1, acc2));
 
@@ -155,16 +158,16 @@ class AccountControllerIT {
         UUID id = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         AccountStatus status = AccountStatus.ACTIVE;
-        var entity = new AccountEntity(id, ownerId, BigDecimal.valueOf(150), status);
+        var entity = new AccountEntity(ownerId, BigDecimal.valueOf(150), status);
 
-        repository.save(entity);
+        var savedEntity = repository.save(entity);
 
         mockMvc.perform(
-                get("/api/accounts/" + id)
+                get("/api/accounts/" + savedEntity.getId())
                     .header("Authorization", "Basic " + basic)
             )
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(id.toString()))
+            .andExpect(jsonPath("$.id").value(savedEntity.getId().toString()))
             .andExpect(jsonPath("$.ownerId").value(ownerId.toString()))
             .andExpect(jsonPath("$.balance").value(150));
     }
@@ -190,18 +193,18 @@ class AccountControllerIT {
         UUID id = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         AccountStatus status = AccountStatus.ACTIVE;
-        var entity = new AccountEntity(id, ownerId, BigDecimal.valueOf(150), status);
+        var entity = new AccountEntity(ownerId, BigDecimal.valueOf(150), status);
 
         repository.save(entity);
 
         mockMvc.perform(
-                delete("/api/accounts/" + id)
+                delete("/api/accounts/" + entity.getId())
                     .header("Authorization", "Basic " + basic)
             )
             .andExpect(status().isNoContent());
 
         // Vérification : le compte n'existe plus
-        assertFalse(repository.findById(id).isPresent());
+        assertFalse(repository.findById(entity.getId()).isPresent());
     }
 
     @Test
@@ -234,7 +237,7 @@ class AccountControllerIT {
         
         // Arrange : créer un compte en base
         UUID ownerId = UUID.randomUUID();
-        AccountEntity entity = new AccountEntity(null, ownerId, BigDecimal.ZERO, AccountStatus.ACTIVE);
+        AccountEntity entity = new AccountEntity(ownerId, BigDecimal.ZERO, AccountStatus.ACTIVE);
         AccountEntity entitySaved = repository.save(entity);
 
         // Act + Assert
@@ -287,8 +290,7 @@ class AccountControllerIT {
     void depositShouldReturn409WhenAccountSuspended() throws Exception {
         // Arrange : compte suspendu
         UUID id = UUID.randomUUID();
-        AccountEntity entity = new AccountEntity(  
-            null,
+        AccountEntity entity = new AccountEntity(
             UUID.randomUUID(),
             BigDecimal.ZERO,
             AccountStatus.SUSPENDED
@@ -303,6 +305,96 @@ class AccountControllerIT {
                         .header("Authorization", "Basic " + basic)
                         .content("""
                                 {"amount": 10}
+                                """))
+                .andExpect(status().isConflict()); // ou 422 selon ton mapping
+    }
+
+    @Test
+    void withdrawShouldReturn200AndUpdateBalance() throws Exception {
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+
+        // Arrange : créer un compte en base
+        UUID ownerId = UUID.randomUUID();
+        AccountEntity entity = new AccountEntity(ownerId, BigDecimal.valueOf(100), AccountStatus.ACTIVE);
+        AccountEntity saved = repository.save(entity);
+
+        // Act + Assert
+        mockMvc.perform(post("/api/accounts/" + saved.getId() + "/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 30}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.balance").value(70));
+
+        // Vérification en base
+        AccountEntity updated = repository.findById(saved.getId()).orElseThrow();
+        assertEquals(new BigDecimal("70.00"), updated.getBalance());
+    }
+
+    @Test
+    void withdrawShouldReturn400WhenAmountIsInvalid() throws Exception {
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(post("/api/accounts/" + id + "/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 0}
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void withdrawShouldReturn404WhenAccountNotFound() throws Exception {
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+
+        UUID unknownId = UUID.randomUUID();
+
+        mockMvc.perform(post("/api/accounts/" + unknownId + "/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 10}
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void withdrawShouldReturn409WhenAccountSuspended() throws Exception {
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+
+        // Arrange : compte suspendu
+        UUID ownerId = UUID.randomUUID();
+        AccountEntity entity = new AccountEntity(ownerId, BigDecimal.valueOf(100), AccountStatus.SUSPENDED);
+        AccountEntity saved = repository.save(entity);
+
+        mockMvc.perform(post("/api/accounts/" + saved.getId() + "/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 10}
+                                """))
+                .andExpect(status().isConflict()); // même logique que deposit
+    }
+
+    @Test
+    void withdrawShouldReturn409WhenBalanceInsufficient() throws Exception {
+        String basic = Base64.getEncoder().encodeToString("user:password".getBytes());
+
+        // Arrange : solde insuffisant
+        UUID ownerId = UUID.randomUUID();
+        AccountEntity entity = new AccountEntity(ownerId, BigDecimal.valueOf(20), AccountStatus.ACTIVE);
+        AccountEntity saved = repository.save(entity);
+
+        mockMvc.perform(post("/api/accounts/" + saved.getId() + "/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Basic " + basic)
+                        .content("""
+                                {"amount": 50}
                                 """))
                 .andExpect(status().isConflict()); // ou 422 selon ton mapping
     }

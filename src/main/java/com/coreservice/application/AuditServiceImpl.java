@@ -39,10 +39,24 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
+    @Transactional
     public void recordCredit(Account account, BigDecimal amount) {
         AuditEvent entry = new AuditEvent(
                 "ACCOUNT_CREDITED",
                 "Credit of " + amount + " applied to account" + account.getId() + " at " + Instant.now()
+        );
+
+        AuditEventEntity entity = AuditMapper.toEntity(entry);
+
+        auditRepository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public void recordDebit(Account account, BigDecimal amount) {
+        AuditEvent entry = new AuditEvent(
+                "ACCOUNT_DEBITED",
+                "Debit of " + amount + " applied to account" + account.getId() + " at " + Instant.now()
         );
 
         AuditEventEntity entity = AuditMapper.toEntity(entry);

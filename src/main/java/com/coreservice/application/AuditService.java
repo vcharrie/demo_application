@@ -17,4 +17,7 @@ public interface AuditService {
 
     @Transactional
     public void recordCredit(Account account, BigDecimal amount);
+
+    @Transactional
+    public void recordDebit(Account account, BigDecimal amount);
 }

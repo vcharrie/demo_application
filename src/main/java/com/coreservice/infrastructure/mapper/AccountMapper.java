@@ -11,7 +11,6 @@ public class AccountMapper {
     @NonNull
     public static AccountEntity toEntity(Account account) {
         return new AccountEntity(
-                account.getId(),
                 account.getOwnerId(),
                 account.getBalance(),
                 account.getStatus());

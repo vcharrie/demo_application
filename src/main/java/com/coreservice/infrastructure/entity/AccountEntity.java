@@ -30,8 +30,7 @@ public class AccountEntity {
     protected AccountEntity() {
     }
 
-    public AccountEntity(UUID id, UUID ownerId, BigDecimal balance, AccountStatus status) {
-        this.id = id;
+    public AccountEntity(UUID ownerId, BigDecimal balance, AccountStatus status) {
         this.ownerId = ownerId;
         this.balance = balance;
         this.status = status;

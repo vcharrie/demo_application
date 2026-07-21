@@ -19,4 +19,6 @@ public interface AccountService {
     public void delete(@NonNull UUID id);
 
     public Account deposit(@NonNull UUID accountId, @NonNull BigDecimal amount);
+
+    public Account withdraw(@NonNull UUID accountId, @NonNull BigDecimal amount);
 }
