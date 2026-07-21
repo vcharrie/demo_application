@@ -1,6 +1,8 @@
-package com.coreservice.domain;
+package com.coreservice.application;
 
 import java.util.List;
+
+import com.coreservice.domain.Resource;
 
 public interface ResourceService {
 

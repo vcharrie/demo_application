@@ -2,9 +2,11 @@ package com.coreservice.api;
 
 import com.coreservice.api.dto.AccountRequest;
 import com.coreservice.api.dto.AccountResponse;
+import com.coreservice.api.dto.DepositRequest;
+import com.coreservice.api.dto.WithdrawRequest;
 import com.coreservice.api.mapper.AccountApiMapper;
+import com.coreservice.application.AccountService;
 import com.coreservice.domain.Account;
-import com.coreservice.domain.AccountService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -64,5 +66,22 @@ public class AccountController {
         service.delete(UUID.fromString(id));
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/deposit")
+    public Account deposit(
+            @PathVariable UUID id,
+            @Valid @RequestBody DepositRequest request) {
+
+        return service.deposit(id, request.amount());
+    } 
+
+    @PostMapping("/{id}/withdraw")
+    public Account withdraw(
+        @PathVariable UUID id,
+        @Valid @RequestBody WithdrawRequest request) {
+
+        return service.withdraw(id, request.amount());
+    }
+    
 
 }

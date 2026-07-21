@@ -8,12 +8,15 @@ import com.coreservice.domain.AccountStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class AccountEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private UUID ownerId;
@@ -27,8 +30,7 @@ public class AccountEntity {
     protected AccountEntity() {
     }
 
-    public AccountEntity(UUID id, UUID ownerId, BigDecimal balance, AccountStatus status) {
-        this.id = id;
+    public AccountEntity(UUID ownerId, BigDecimal balance, AccountStatus status) {
         this.ownerId = ownerId;
         this.balance = balance;
         this.status = status;
