@@ -6,7 +6,8 @@ public enum TechnicalError {
     NETWORK_ERROR("TECH_NET_001", "A network error occurred"),
     TIMEOUT_ERROR("TECH_TIMEOUT_001", "A timeout occurred"),
     IO_ERROR("TECH_IO_001", "An I/O error occurred"),
-    UNKNOWN_ERROR("TECH_UNKNOWN_001", "An unknown technical error occurred");
+    UNKNOWN_ERROR("TECH_UNKNOWN_001", "An unknown technical error occurred"),
+    TRANSFER_FAILED("TECH_TRANSFER_001", "Transfer operation failed");
 
     private final String code;
     private final String message;

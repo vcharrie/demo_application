@@ -40,7 +40,7 @@ public class AccountController {
 
     @GetMapping
     public ResponseEntity<List<AccountResponse>> findAll() {
-        var accounts = service.findAll()
+        var accounts = service.getAccounts()
                 .stream()
                 .map(AccountApiMapper::toResponse)
                 .toList();
@@ -53,7 +53,7 @@ public class AccountController {
             @Pattern(regexp = "^[a-fA-F0-9-]{36}$")
             String id) {
 
-        Account account = service.findById(UUID.fromString(id));
+        Account account = service.getAccount(UUID.fromString(id));
         return ResponseEntity.ok(AccountApiMapper.toResponse(account));
     }
 

@@ -5,7 +5,9 @@ public enum BusinessError {
     ACCOUNT_OWNER_ID_NULL("BUS_ACCOUNT_OWNER_ID_NULL", "Account owner ID cannot be null"),
     AMOUNT_INVALID("BUS_AMOUNT_INVALID", "Amount %s is invalid"),
     ACCOUNT_SUSPENDED("BUS_ACCOUNT_SUSPENDED", "Account %s is suspended"),
-    ACCOUNT_INSUFFICIENT_FUNDS("BUS_INSUFFICIENT_FUNDS", "Insufficient funds: balance=%s, attempted debit=%s");
+    ACCOUNT_CLOSED("BUS_ACCOUNT_CLOSED", "Account %s is closed"),
+    ACCOUNT_INSUFFICIENT_FUNDS("BUS_INSUFFICIENT_FUNDS", "Insufficient funds: balance=%s, attempted debit=%s"),
+    TRANSFER_SAME_ACCOUNT("BUS_TRANSFER_SAME_ACCOUNT", "Transfer failed: source and destination accounts are the same (%s)");
 
     private final String code;
     private final String template;

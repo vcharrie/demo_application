@@ -12,13 +12,15 @@ public interface AccountService {
 
     public Account createAccount(UUID ownerId, BigDecimal initialBalance);
 
-    public List<Account> findAll();
+    public List<Account> getAccounts();
 
-    public Account findById(@NonNull UUID id);
+    public Account getAccount(@NonNull UUID id);
 
     public void delete(@NonNull UUID id);
 
     public Account deposit(@NonNull UUID accountId, @NonNull BigDecimal amount);
 
     public Account withdraw(@NonNull UUID accountId, @NonNull BigDecimal amount);
+
+    public void updateAccount(Account account);
 }

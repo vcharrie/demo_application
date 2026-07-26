@@ -101,7 +101,7 @@ class AccountServiceImplTest {
 
     @Test
     void shouldThrowIfIdIsNull() {
-        assertThatThrownBy(() -> accountService.findById(null))
+        assertThatThrownBy(() -> accountService.getAccount(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("id is marked non-null but is null");
     }
@@ -112,7 +112,7 @@ class AccountServiceImplTest {
 
         when(accountRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> accountService.findById(id))
+        assertThatThrownBy(() -> accountService.getAccount(id))
                 .isInstanceOf(FunctionalException.class);
     }
 
@@ -128,7 +128,7 @@ class AccountServiceImplTest {
 
         when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
 
-        Account account = accountService.findById(id);
+        Account account = accountService.getAccount(id);
 
         assertThat(account.getOwnerId()).isEqualTo(ownerId);
         assertThat(account.getBalance()).isEqualTo(balance);
@@ -138,7 +138,7 @@ class AccountServiceImplTest {
     void shouldReturnEmptyListWhenNoAccountsExist() {
         when(accountRepository.findAll()).thenReturn(List.of());
 
-        List<Account> accounts = accountService.findAll();
+        List<Account> accounts = accountService.getAccounts();
 
         assertThat(accounts).isEmpty();
     }
@@ -157,7 +157,7 @@ class AccountServiceImplTest {
 
         when(accountRepository.findAll()).thenReturn(List.of(e1, e2));
 
-        List<Account> accounts = accountService.findAll();
+        List<Account> accounts = accountService.getAccounts();
 
         assertThat(accounts).hasSize(2);
 

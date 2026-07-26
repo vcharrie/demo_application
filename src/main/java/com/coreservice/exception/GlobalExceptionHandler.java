@@ -13,6 +13,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import com.coreservice.application.exception.FunctionalError;
 import com.coreservice.application.exception.FunctionalException;
 import com.coreservice.application.exception.ResourceNotFoundException;
+import com.coreservice.application.exception.TechnicalException;
 import com.coreservice.domain.exception.BusinessException;
 
 import jakarta.validation.ConstraintViolationException;
@@ -142,11 +143,21 @@ public class GlobalExceptionHandler {
     // 4. Erreurs métier (ex : ACCOUNT_SUSPENDED → 409)
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Object> handleBusiness(BusinessException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                         "error", ex.getError().name(),
                         "message", ex.getMessage()
                 ));
+    }
+
+    @ExceptionHandler(TechnicalException.class)
+    public ResponseEntity<Object> handleTechnicalException(TechnicalException ex) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of(
+                    "error", ex.getError().name(),
+                    "message", ex.getMessage()
+            )  );
     }
 
 

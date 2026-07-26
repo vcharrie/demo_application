@@ -65,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> findAll() {
+    public List<Account> getAccounts() {
         return accountRepository.findAll()
             .stream()
             .map(AccountMapper::toDomain)
@@ -73,7 +73,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account findById(@NonNull UUID id) {
+    public Account getAccount(@NonNull UUID id) {
 
         AccountEntity entity = accountRepository.findById(id)
             .orElseThrow(() -> new FunctionalException(FunctionalError.ACCOUNT_NOT_FOUND, id.toString()));
@@ -132,6 +132,13 @@ public class AccountServiceImpl implements AccountService {
         accountRepository.save(entity);
 
         return account;
+    }
+
+    @Override
+    @Transactional
+    public void updateAccount(Account account) {
+        AccountEntity entity = AccountMapper.toEntity(account);
+        accountRepository.save(entity);      
     }
     
 
