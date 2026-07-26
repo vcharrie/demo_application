@@ -49,7 +49,7 @@
 
     <Match>
         <Class name="com.coreservice.application.TransferServiceImpl"/>
-        <Bug code="EI_EXPOSE_REP2"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
 
 </FindBugsFilter>

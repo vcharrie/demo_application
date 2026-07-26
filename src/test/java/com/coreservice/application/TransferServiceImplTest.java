@@ -13,13 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.coreservice.application.exception.ResourceNotFoundException;
 import com.coreservice.application.exception.TechnicalException;
 import com.coreservice.config.TransferProperties;
 import com.coreservice.domain.Account;
 import com.coreservice.domain.AccountStatus;
-import com.coreservice.domain.Operation;
 import com.coreservice.domain.OperationStatus;
 import com.coreservice.domain.Transfer;
 import com.coreservice.domain.exception.BusinessException;
@@ -58,7 +55,7 @@ class TransferServiceImplTest {
         UUID dstAccountId = UUID.randomUUID();
         BigDecimal amount = new BigDecimal("100");
 
-        Account srcAccount = new Account(srcOwnerId,srcAccountId, new BigDecimal("1000"), AccountStatus.ACTIVE);
+        Account srcAccount = new Account(srcOwnerId, srcAccountId, new BigDecimal("1000"), AccountStatus.ACTIVE);
         when(accountService.getAccount(srcAccountId)).thenReturn(srcAccount);
         
         
