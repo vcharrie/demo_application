@@ -7,21 +7,22 @@ public enum TechnicalError {
     TIMEOUT_ERROR("TECH_TIMEOUT_001", "A timeout occurred"),
     IO_ERROR("TECH_IO_001", "An I/O error occurred"),
     UNKNOWN_ERROR("TECH_UNKNOWN_001", "An unknown technical error occurred"),
-    TRANSFER_FAILED("TECH_TRANSFER_001", "Transfer operation failed");
+    TRANSFER_FAILED("TECH_TRANSFER_001", "Transfer operation failed"),
+    UNSUPPORTED_DECISION("TECH_UNSUPPORTED_DECISION", "Unsupported validation decision: %s");
 
     private final String code;
-    private final String message;
+    private final String template;
 
-    TechnicalError(String code, String message) {
+    TechnicalError(String code, String template) {
         this.code = code;
-        this.message = message;
+        this.template = template;
     }
 
     public String code() {
         return code;
     }
 
-    public String message() {
-        return message;
+    public String template() {
+        return template;
     }
 }

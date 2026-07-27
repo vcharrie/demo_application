@@ -11,6 +11,7 @@ import com.coreservice.config.TransferProperties;
 import com.coreservice.domain.Account;
 import com.coreservice.domain.OperationStatus;
 import com.coreservice.domain.Transfer;
+import com.coreservice.domain.ValidationDecision;
 import com.coreservice.domain.exception.BusinessError;
 import com.coreservice.domain.exception.BusinessException;
 import com.coreservice.infrastructure.entity.OperationEntity;
@@ -18,22 +19,23 @@ import com.coreservice.infrastructure.mapper.OperationMapper;
 import com.coreservice.infrastructure.repository.OperationRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.NonNull;
 
 @Service
 public class TransferServiceImpl implements TransferService {
 
     private final AccountService accountService;
-    //private final AuditService auditEventService;
+    private final AuditService auditService;
     private final BigDecimal seuilSensibilite;
     private final OperationRepository operationRepository;
     
 
     public TransferServiceImpl(AccountService accountService,
-                               AuditService auditEventService,
+                               AuditService auditService,
                                TransferProperties transferProperties,
                                OperationRepository operationRepository) {
         this.accountService = accountService;
-        //this.auditEventService = auditEventService;
+        this.auditService = auditService;
         this.seuilSensibilite = transferProperties.getSeuilSensibilite();
         this.operationRepository = operationRepository;
     }
@@ -49,7 +51,7 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     @Transactional
-    public Transfer initiateTransfer(UUID sourceAccountId, UUID destinationAccountId, BigDecimal amount) {
+    public Transfer initiateTransfer(@NonNull UUID sourceAccountId, @NonNull UUID destinationAccountId, @NonNull BigDecimal amount) {
         Transfer transferOp = null;
         
         try {
@@ -98,6 +100,7 @@ public class TransferServiceImpl implements TransferService {
             persistSafely(failed);
             throw be; // on remonte l'erreur métier
         } catch (Exception e) {
+            e.printStackTrace();
             // Erreur technique → FAILED
             Transfer failed = new Transfer(sourceAccountId, destinationAccountId, amount);
             failed.setStatus(OperationStatus.FAILED);
@@ -106,6 +109,46 @@ public class TransferServiceImpl implements TransferService {
         }
 
         return transferOp;
+    }
+
+    @Override
+    @Transactional
+    public void validateTransfer(@NonNull UUID transferId, @NonNull ValidationDecision decision) {
+
+        // Charger l'opération persistée
+        OperationEntity entity = operationRepository.findById(transferId)
+                .orElseThrow(() -> new BusinessException(
+                        BusinessError.TRANSFER_NOT_FOUND,
+                        transferId.toString()
+                ));
+
+        // Mapper vers le domaine
+        Transfer transfer = (Transfer) OperationMapper.toDomain(entity);
+
+        // Vérifier état PENDING
+        if (transfer.getStatus() != OperationStatus.PENDING) {
+            throw new BusinessException(
+                    BusinessError.INVALID_TRANSFER_STATUS,
+                    transfer.getStatus().name()
+            );
+        }
+
+        // Appliquer la décision
+        switch (decision) {
+            case APPROVE -> transfer.setStatus(OperationStatus.COMPLETED);
+            case REJECT -> transfer.setStatus(OperationStatus.FAILED);
+            default -> throw new TechnicalException(
+                    TechnicalError.UNSUPPORTED_DECISION,
+                    decision.name()
+            );
+        }
+
+        // Persister la mise à jour
+        OperationEntity updated = OperationMapper.toEntity(transfer);
+        operationRepository.save(updated);
+
+        // Historisation (pas encore implémentée)
+        auditService.recordTransferValidation(transferId, decision);
     }
 
 }
