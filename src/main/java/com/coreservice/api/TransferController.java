@@ -5,12 +5,15 @@ import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coreservice.api.dto.TransferRequest;
 import com.coreservice.api.dto.TransferResult;
+import com.coreservice.api.dto.TransferValidationRequest;
+import com.coreservice.api.dto.TransferValidationResult;
 import com.coreservice.api.mapper.TransferApiMapper;
 import com.coreservice.application.TransferService;
 import com.coreservice.domain.Transfer;
@@ -41,6 +44,14 @@ public class TransferController {
         TransferResult result = TransferApiMapper.toTransferResult(transfer);
 
         
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping
+    public ResponseEntity<TransferValidationResult> validateTransfer(@RequestBody @Valid TransferValidationRequest request) {
+        // Appel du service métier
+        TransferValidationResult result = transferService.validateTransfer(request);
+
         return ResponseEntity.ok(result);
     }
 }

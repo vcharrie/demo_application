@@ -5,8 +5,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.coreservice.api.dto.TransferValidationRequest;
+import com.coreservice.api.dto.TransferValidationResult;
 import com.coreservice.domain.Transfer;
-import com.coreservice.domain.ValidationDecision;
+
 
 @Service
 public interface TransferService {
@@ -32,5 +34,5 @@ public interface TransferService {
      * @param transferId l'identifiant du virement
      * @param decision la décision de validation
      */
-    public void validateTransfer(UUID transferId, ValidationDecision decision);
+    public TransferValidationResult validateTransfer(TransferValidationRequest transferValidationRequest );
 }

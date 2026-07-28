@@ -5,6 +5,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.coreservice.api.dto.TransferValidationRequest;
+import com.coreservice.api.dto.TransferValidationResult;
+import com.coreservice.api.mapper.TransferApiMapper;
 import com.coreservice.application.exception.TechnicalError;
 import com.coreservice.application.exception.TechnicalException;
 import com.coreservice.config.TransferProperties;
@@ -113,13 +116,13 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     @Transactional
-    public void validateTransfer(@NonNull UUID transferId, @NonNull ValidationDecision decision) {
+    public TransferValidationResult validateTransfer(TransferValidationRequest transferValidationRequest ) {
 
         // Charger l'opération persistée
-        OperationEntity entity = operationRepository.findById(transferId)
+        OperationEntity entity = operationRepository.findById(transferValidationRequest.transferId())
                 .orElseThrow(() -> new BusinessException(
                         BusinessError.TRANSFER_NOT_FOUND,
-                        transferId.toString()
+                        transferValidationRequest.transferId().toString()
                 ));
 
         // Mapper vers le domaine
@@ -132,6 +135,8 @@ public class TransferServiceImpl implements TransferService {
                     transfer.getStatus().name()
             );
         }
+
+        ValidationDecision decision = TransferApiMapper.toValidationDecision(transferValidationRequest.decision());
 
         // Appliquer la décision
         switch (decision) {
@@ -148,7 +153,10 @@ public class TransferServiceImpl implements TransferService {
         operationRepository.save(updated);
 
         // Historisation (pas encore implémentée)
-        auditService.recordTransferValidation(transferId, decision);
+        auditService.recordTransferValidation(updated.getId(), decision);
+
+        return TransferApiMapper.toTransferValidationResult(transfer);
+        
     }
 
 }

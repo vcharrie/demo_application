@@ -15,13 +15,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.coreservice.api.dto.TransferValidationRequest;
 import com.coreservice.application.exception.TechnicalException;
 import com.coreservice.config.TransferProperties;
 import com.coreservice.domain.Account;
 import com.coreservice.domain.AccountStatus;
 import com.coreservice.domain.OperationStatus;
 import com.coreservice.domain.Transfer;
-import com.coreservice.domain.ValidationDecision;
 import com.coreservice.domain.exception.BusinessException;
 import com.coreservice.infrastructure.entity.OperationEntity;
 import com.coreservice.infrastructure.mapper.OperationMapper;
@@ -115,7 +116,6 @@ class TransferServiceImplTest {
     @Test
     public void testValidateTransfer() {
         UUID transferId = UUID.randomUUID();
-        ValidationDecision decision = ValidationDecision.APPROVE;
 
         // Mock the operation repository to return a pending transfer
         Transfer pendingTransfer = new Transfer(UUID.randomUUID(), UUID.randomUUID(), new BigDecimal("500"));
@@ -129,8 +129,10 @@ class TransferServiceImplTest {
 
         ArgumentCaptor<OperationEntity> captor = ArgumentCaptor.forClass(OperationEntity.class);
 
+        TransferValidationRequest request = new TransferValidationRequest(transferId, com.coreservice.api.dto.ValidationDecision.APPROVE);
+
         // Call the validateTransfer method
-        service.validateTransfer(transferId, decision);
+        service.validateTransfer(request);
 
         verify(operationRepository).save(captor.capture());
 
