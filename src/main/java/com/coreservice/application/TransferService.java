@@ -5,7 +5,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.coreservice.api.dto.TransferValidationRequest;
+import com.coreservice.api.dto.TransferValidationResult;
 import com.coreservice.domain.Transfer;
+
 
 @Service
 public interface TransferService {
@@ -24,4 +27,12 @@ public interface TransferService {
      * - historisation obligatoire
      */
     Transfer initiateTransfer(UUID sourceAccountId, UUID destinationAccountId, BigDecimal amount);
+
+    /**
+     * Valide un virement en attente.
+     *
+     * @param transferId l'identifiant du virement
+     * @param decision la décision de validation
+     */
+    public TransferValidationResult validateTransfer(TransferValidationRequest transferValidationRequest );
 }

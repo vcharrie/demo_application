@@ -2,12 +2,14 @@ package com.coreservice.application;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.coreservice.domain.Account;
 import com.coreservice.domain.AuditEvent;
+import com.coreservice.domain.ValidationDecision;
 import com.coreservice.infrastructure.entity.AuditEventEntity;
 import com.coreservice.infrastructure.mapper.AuditMapper;
 import com.coreservice.infrastructure.repository.AuditRepository;
@@ -62,6 +64,31 @@ public class AuditServiceImpl implements AuditService {
         AuditEventEntity entity = AuditMapper.toEntity(entry);
 
         auditRepository.save(entity);
+    }
+
+    @Override
+    public void recordTransferInitiation(Account source, Account destination, BigDecimal amount) {
+        AuditEvent entry = new AuditEvent(
+                "TRANSFER_INITIATED",
+                "Transfer of " + amount + " initiated from account" + source.getId() + " to account" + destination.getId() + " at " + Instant.now()
+        );
+
+        AuditEventEntity entity = AuditMapper.toEntity(entry);
+
+        auditRepository.save(entity);
+    }
+
+    @Override
+    public void recordTransferValidation(UUID transferId, ValidationDecision decision) {
+        AuditEvent entry = new AuditEvent(
+                "TRANSFER_VALIDATED",
+                "Transfer " + transferId + " validated with decision: " + decision
+        );
+
+        AuditEventEntity entity = AuditMapper.toEntity(entry);
+
+        auditRepository.save(entity);
+        
     }
 
 }   

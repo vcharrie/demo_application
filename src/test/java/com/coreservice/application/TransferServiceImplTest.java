@@ -3,6 +3,7 @@ package com.coreservice.application;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -11,8 +12,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.coreservice.api.dto.TransferValidationRequest;
 import com.coreservice.application.exception.TechnicalException;
 import com.coreservice.config.TransferProperties;
 import com.coreservice.domain.Account;
@@ -20,18 +24,18 @@ import com.coreservice.domain.AccountStatus;
 import com.coreservice.domain.OperationStatus;
 import com.coreservice.domain.Transfer;
 import com.coreservice.domain.exception.BusinessException;
+import com.coreservice.infrastructure.entity.OperationEntity;
+import com.coreservice.infrastructure.mapper.OperationMapper;
 import com.coreservice.infrastructure.repository.OperationRepository;
 
 @ExtendWith(MockitoExtension.class)
 class TransferServiceImplTest {
 
-    @Mock
-    private AccountService accountService;
+    TransferServiceImpl service;
 
-    @Mock
-    private OperationRepository operationRepository;
-
-    private TransferServiceImpl service;
+    @Mock AccountService accountService;
+    @Mock AuditService auditService;
+    @Mock OperationRepository operationRepository;
 
     @BeforeEach
     void setup() {
@@ -40,7 +44,7 @@ class TransferServiceImplTest {
 
         service = new TransferServiceImpl(
             accountService,
-            null,
+            auditService,
             props,
             operationRepository
         );
@@ -63,6 +67,8 @@ class TransferServiceImplTest {
         when(accountService.getAccount(dstAccountId)).thenReturn(dstAccount);
 
         when(operationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        
 
         // Act
         Transfer result = service.initiateTransfer(srcAccountId, dstAccountId, amount);
@@ -106,4 +112,36 @@ class TransferServiceImplTest {
         assertThatThrownBy(() -> service.initiateTransfer(srcAccountId, dstAccountId, amount))
                 .isInstanceOf(TechnicalException.class);
     }
+
+    @Test
+    public void testValidateTransfer() {
+        UUID transferId = UUID.randomUUID();
+
+        // Mock the operation repository to return a pending transfer
+        Transfer pendingTransfer = new Transfer(UUID.randomUUID(), UUID.randomUUID(), new BigDecimal("500"));
+        pendingTransfer.setStatus(OperationStatus.PENDING);
+        OperationEntity pendingTransferEntity = OperationMapper.toEntity(pendingTransfer);
+
+        when(operationRepository.findById(transferId)).thenReturn(java.util.Optional.of(pendingTransferEntity));
+
+        // Mock the save method to return the updated transfer
+        when(operationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        ArgumentCaptor<OperationEntity> captor = ArgumentCaptor.forClass(OperationEntity.class);
+
+        TransferValidationRequest request = new TransferValidationRequest(transferId, com.coreservice.api.dto.ValidationDecision.APPROVE);
+
+        // Call the validateTransfer method
+        service.validateTransfer(request);
+
+        verify(operationRepository).save(captor.capture());
+
+        OperationEntity saved = captor.getValue();
+        
+        Transfer savedTransfer = (Transfer) OperationMapper.toDomain(saved);
+
+        assertEquals(OperationStatus.COMPLETED, savedTransfer.getStatus());
+
+    }
+
 }
