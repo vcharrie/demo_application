@@ -63,7 +63,7 @@
     </Match>
 
     <Match>
-        <Class name="com.coreservice.api.dto.AccountHistoryResponse"/>
+        <Class name="com.coreservice.application.OperationServiceImpl"/>
         <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
     </Match>
 
