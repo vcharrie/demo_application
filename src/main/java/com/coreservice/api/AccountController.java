@@ -1,11 +1,13 @@
 package com.coreservice.api;
 
+import com.coreservice.api.dto.AccountHistoryResponse;
 import com.coreservice.api.dto.AccountRequest;
 import com.coreservice.api.dto.AccountResponse;
 import com.coreservice.api.dto.DepositRequest;
 import com.coreservice.api.dto.WithdrawRequest;
 import com.coreservice.api.mapper.AccountApiMapper;
 import com.coreservice.application.AccountService;
+import com.coreservice.application.OperationService;
 import com.coreservice.domain.Account;
 
 import jakarta.validation.Valid;
@@ -25,8 +27,13 @@ public class AccountController {
 
     private final AccountService service;
 
-    public AccountController(AccountService service) {
+    private final OperationService operationService;
+
+    public AccountController(AccountService service,
+                             OperationService operationService
+    ) {
         this.service = service;
+        this.operationService = operationService;
     }
 
     @PostMapping
@@ -81,6 +88,18 @@ public class AccountController {
         @Valid @RequestBody WithdrawRequest request) {
 
         return service.withdraw(id, request.amount());
+    }
+
+        /**
+     * GET /api/accounts/{id}/operations
+     * Retourne l'historique des opérations du compte.
+     */
+    @GetMapping("/{id}/operations")
+    public ResponseEntity<AccountHistoryResponse> getAccountHistory(@PathVariable("id") UUID accountId) {
+
+        AccountHistoryResponse history = operationService.getAccountHistory(accountId);
+
+        return ResponseEntity.ok(history);
     }
     
 
