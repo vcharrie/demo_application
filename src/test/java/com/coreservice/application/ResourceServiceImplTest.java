@@ -1,8 +1,8 @@
 package com.coreservice.application;
 
+import com.coreservice.application.exception.ResourceConflictException;
+import com.coreservice.application.exception.ResourceNotFoundException;
 import com.coreservice.domain.Resource;
-import com.coreservice.domain.exception.ResourceConflictException;
-import com.coreservice.domain.exception.ResourceNotFoundException;
 import com.coreservice.infrastructure.entity.ResourceEntity;
 import com.coreservice.infrastructure.repository.ResourceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,13 +37,13 @@ class ResourceServiceImplTest {
         Resource resource = new Resource(randomUuid.toString(), "Test", "desc");
 
         when(repository.findByName("Test")).thenReturn(Optional.empty());
-        when(repository.save(any()))
+        when(repository.save(any(ResourceEntity.class)))
                 .thenReturn(new ResourceEntity(randomUuid, "Test", "desc"));
 
         Resource result = service.create(resource);
 
         assertThat(result.getId()).isEqualTo(randomUuid.toString());
-        verify(repository).save(any());
+        verify(repository).save(any(ResourceEntity.class));
     }
 
     @Test

@@ -2,18 +2,26 @@ package com.coreservice.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import com.coreservice.domain.exception.ResourceNotFoundException;
+import com.coreservice.application.exception.FunctionalError;
+import com.coreservice.application.exception.FunctionalException;
+import com.coreservice.application.exception.ResourceNotFoundException;
+import com.coreservice.application.exception.TechnicalException;
+import com.coreservice.domain.exception.BusinessException;
 
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -21,6 +29,28 @@ public class GlobalExceptionHandler {
     private static final String ERROR = "error";
     private static final String MESSAGE = "message";
     private static final String DETAILS = "details";
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+
+        // Cas spécifique : UUID invalide
+        if (ex.getRequiredType() == UUID.class) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "error", "INVALID_UUID",
+                            "message", "Invalid UUID: " + ex.getValue()
+                    ));
+        }
+
+        // Autres erreurs de type mismatch → BAD_REQUEST générique
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "BAD_REQUEST",
+                        "message", ex.getMessage()
+                ));
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidation(MethodArgumentNotValidException ex) {
@@ -70,6 +100,24 @@ public class GlobalExceptionHandler {
                         MESSAGE, ex.getMessage()));
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleInvalidJson(HttpMessageNotReadableException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        ERROR, "BAD_REQUEST",
+                        MESSAGE, ex.getMessage()));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleAuthentication(AuthenticationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of(
+                        ERROR, "UNAUTHORIZED",
+                        MESSAGE, ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex) {
         ex.printStackTrace();
@@ -94,6 +142,46 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .header("errorResponse", "not_found")
                 .body(Map.of("error", "NOT_FOUND"));
+    }
+
+    // 3. Erreurs fonctionnelles (ex : ACCOUNT_NOT_FOUND → 404)
+    @ExceptionHandler(FunctionalException.class)
+    public ResponseEntity<Object> handleFunctional(FunctionalException ex) {
+
+        if (ex.getError() == FunctionalError.ACCOUNT_NOT_FOUND) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(
+                            "error", ex.getError().name(),
+                            "message", ex.getMessage()
+                    ));
+        }
+
+        // Autres erreurs fonctionnelles → 400
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", ex.getError().name(),
+                        "message", ex.getMessage()
+                ));
+    }
+
+    // 4. Erreurs métier (ex : ACCOUNT_SUSPENDED → 409)
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<Object> handleBusiness(BusinessException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", ex.getError().name(),
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(TechnicalException.class)
+    public ResponseEntity<Object> handleTechnicalException(TechnicalException ex) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of(
+                    "error", ex.getError().name(),
+                    "message", ex.getMessage()
+            )  );
     }
 
 
