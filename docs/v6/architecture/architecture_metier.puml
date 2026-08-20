@@ -1,0 +1,49 @@
+@startuml
+title Cartographie des processus métier
+
+partition "Gestion des comptes" {
+  start
+  :Client demande création de compte;
+  :Créer compte;
+  :Historiser opération;
+  stop
+}
+
+partition "Dépôt" {
+  start
+  :Client initie dépôt;
+  :Vérifier compte actif;
+  :Mettre à jour solde;
+  :Historiser opération;
+  stop
+}
+
+partition "Retrait" {
+  start
+  :Client initie retrait;
+  :Vérifier solde suffisant;
+  :Mettre à jour solde;
+  :Historiser opération;
+  stop
+}
+
+partition "Virement" {
+  start
+  :Client initie virement;
+  :Vérifier comptes distincts;
+  :Vérifier solde suffisant;
+  :Créer virement (état = PENDING);
+  :Superviseur valide virement;
+  :Mettre à jour soldes;
+  :Historiser opération;
+  stop
+}
+
+partition "Consultation historique" {
+  start
+  :Client ou superviseur consulte historique;
+  :Afficher opérations;
+  stop
+}
+
+@enduml

@@ -1,0 +1,85 @@
+@startuml
+title Architecture Cloud — AWS / EKS / IAM interne & externe
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ===================================================================
+'  IAM EXTERNE (UTILISATEURS)
+' ===================================================================
+rectangle "IAM Externe\nAWS Cognito\n(OIDC / OAuth2)" as Cognito {
+  actor "Utilisateur externe" as UserExt
+}
+
+UserExt --> Cognito : Authentification\nOIDC Login
+Cognito --> UserExt : ID Token + Access Token
+
+' ===================================================================
+'  IAM INTERNE (ADMIN / APPS INTERNES)
+' ===================================================================
+rectangle "IAM Interne\nAWS IAM Identity Center (SSO)\n(OIDC + SAML)" as IAMInternal {
+  actor "Admin interne" as AdminInt
+  actor "Application interne" as AppInt
+}
+
+AdminInt --> IAMInternal : Authentification SSO
+AppInt --> IAMInternal : Authentification\nClient Credentials
+
+IAMInternal --> AdminInt : Token OIDC
+IAMInternal --> AppInt : Token OIDC / OAuth2
+
+' ===================================================================
+'  API GATEWAY
+' ===================================================================
+rectangle "API Gateway\n(Validation JWT / Routing)" as APIGW
+
+UserExt --> APIGW : Appel API\nAccess Token utilisateur
+AppInt --> APIGW : Appel API\nAccess Token applicatif
+
+' ===================================================================
+'  VPC / RÉSEAU
+' ===================================================================
+rectangle "VPC AWS" as VPC {
+  rectangle "Subnets privés\n(EKS Nodes)" as SubPriv
+  rectangle "Subnets publics\n(Load Balancers / NAT)" as SubPub
+}
+
+APIGW --> SubPub : Routage HTTP(S)
+
+' ===================================================================
+'  EKS CLUSTER
+' ===================================================================
+rectangle "Amazon EKS Cluster" as EKS {
+  rectangle "Control Plane (géré AWS)\n- kube-apiserver\n- etcd\n- scheduler\n- controller-manager" as CP
+
+  rectangle "Worker Nodes\n(EC2 ou Fargate)" as Nodes {
+    rectangle "Node 1\nvCPU: 4\nRAM: 16 GB\nDisk: 100 GB" as Node1
+    rectangle "Node 2\nvCPU: 4\nRAM: 16 GB\nDisk: 100 GB" as Node2
+    rectangle "Node 3\nvCPU: 4\nRAM: 16 GB\nDisk: 100 GB" as Node3
+  }
+
+  rectangle "CNI (Calico/Cilium)\nRéseau Pod + NetworkPolicies" as CNI
+}
+
+SubPriv --> Nodes
+Nodes --> CNI
+
+' ===================================================================
+'  AUTHENTICATION EKS (ADMIN)
+' ===================================================================
+rectangle "aws-iam-authenticator\n(Validation token STS)" as AuthEKS
+
+AdminInt --> AuthEKS : Token STS (IAM)
+AuthEKS --> CP : Identity Mapping\n(username + groups)
+
+' ===================================================================
+'  APPLICATION MÉTIER
+' ===================================================================
+rectangle "CoreService\n(Spring Boot + Spring Security)" as CoreService
+
+APIGW --> CoreService : Requête REST\nJWT validé
+
+CoreService --> Nodes : Déploiement Pods\nvia kubelet
+
+@enduml

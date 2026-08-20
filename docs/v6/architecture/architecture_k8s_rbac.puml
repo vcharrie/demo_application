@@ -1,0 +1,111 @@
+@startuml
+title Schéma Kubernetes — Architecture d'exécution (RBAC Technique)
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ===================================================================
+'  IDENTITÉS EXTERNES (IAM / OIDC)
+' ===================================================================
+rectangle "Identités techniques\n(IAM interne / OIDC interne)" as Identities {
+  actor "DEV" as DevUser
+  actor "OPS" as OpsUser
+  actor "SEC" as SecUser
+}
+
+rectangle "Authentification\n(IAM / OIDC / Certificat client)" as AuthN
+
+DevUser --> AuthN : Authentification
+OpsUser --> AuthN : Authentification
+SecUser --> AuthN : Authentification
+
+' ===================================================================
+'  API SERVER
+' ===================================================================
+rectangle "Kubernetes Control Plane" as ControlPlane {
+  rectangle "kube-apiserver\n(Validation identité + RBAC)" as APIServer
+  rectangle "kube-controller-manager" as Controller
+  rectangle "kube-scheduler" as Scheduler
+  rectangle "etcd" as Etcd
+}
+
+AuthN --> APIServer : Token / Certificat validé
+
+' ===================================================================
+'  RBAC KUBERNETES
+' ===================================================================
+rectangle "RBAC Kubernetes\n(Role / ClusterRole / Binding)" as RBAC {
+  rectangle "ClusterRole: k8s-dev\n(lecture globale)" as RoleDev
+  rectangle "ClusterRole: k8s-ops\n(gestion applicative)" as RoleOps
+  rectangle "ClusterRole: k8s-sec\n(gestion sécurité)" as RoleSec
+
+  rectangle "ClusterRoleBinding\n(dev → k8s-dev)" as BindDev
+  rectangle "ClusterRoleBinding\n(ops → k8s-ops)" as BindOps
+  rectangle "ClusterRoleBinding\n(sec → k8s-sec)" as BindSec
+}
+
+APIServer --> RBAC : Vérification des permissions
+
+DevUser --> BindDev
+OpsUser --> BindOps
+SecUser --> BindSec
+
+BindDev --> RoleDev
+BindOps --> RoleOps
+BindSec --> RoleSec
+
+' ===================================================================
+'  NAMESPACES
+' ===================================================================
+rectangle "Namespaces" as NS {
+  rectangle "namespace: dev" as NSDev
+  rectangle "namespace: preprod" as NSPreprod
+  rectangle "namespace: prod" as NSProd
+}
+
+' ===================================================================
+'  RESSOURCES PAR NAMESPACE
+' ===================================================================
+rectangle "Ressources applicatives" as Resources {
+  rectangle "Pods\n(coreservice)" as Pods
+  rectangle "Deployments" as Deploy
+  rectangle "Services" as Svc
+  rectangle "ConfigMaps" as CM
+  rectangle "Secrets" as Secrets
+}
+
+NSDev --> Pods
+NSDev --> Deploy
+NSDev --> Svc
+NSDev --> CM
+NSDev --> Secrets
+
+NSPreprod --> Pods
+NSProd --> Pods
+
+' ===================================================================
+'  NETWORK POLICIES
+' ===================================================================
+rectangle "NetworkPolicies\n(Isolation réseau)" as NetPol {
+  rectangle "NP: allow-same-namespace" as NP1
+  rectangle "NP: deny-cross-namespace" as NP2
+}
+
+NSDev --> NetPol
+NSPreprod --> NetPol
+NSProd --> NetPol
+
+' ===================================================================
+'  KUBELET
+' ===================================================================
+rectangle "Worker Nodes\n(kubelet + CNI)" as Nodes {
+  rectangle "kubelet\n(exécution des Pods)" as Kubelet
+  rectangle "CNI (Calico/Cilium)\n(réseau Pod)" as CNI
+}
+
+APIServer --> Kubelet : Ordres de création / suppression de Pods
+Kubelet --> Pods : Exécution
+CNI --> NetPol : Application des règles réseau
+
+@enduml

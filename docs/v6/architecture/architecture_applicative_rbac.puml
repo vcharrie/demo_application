@@ -1,0 +1,64 @@
+@startuml
+title Schéma Applicatif — RBAC Métier + IAM interne/externe
+
+skinparam rectangleStyle rounded
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+' ===================================================================
+'  ACTEURS EXTERNES
+' ===================================================================
+rectangle "Applications clientes externes\n(Web, Mobile, Partenaires)" as ExternalApps {
+  actor "Utilisateur externe" as UserExt
+}
+
+rectangle "IAM Externe\n(OIDC / OAuth2)\nex: Cognito, Auth0, Azure AD B2C" as IAM_External
+
+' ===================================================================
+'  ACTEURS INTERNES
+' ===================================================================
+rectangle "Applications internes du SI\n(Backoffice, Batch, Microservices internes)" as InternalApps {
+  actor "Application interne" as AppInt
+}
+
+rectangle "IAM Interne\n(OAuth2 Client Credentials)\nex: AWS IAM + STS, Keycloak interne" as IAM_Internal
+
+' ===================================================================
+'  API GATEWAY
+' ===================================================================
+rectangle "API Gateway\n(Validation JWT / Routing)" as APIGW
+
+' ===================================================================
+'  CORESERVICE
+' ===================================================================
+rectangle "CoreService\n(Spring Boot + Spring Security)\nRBAC Métier" as CoreService {
+  rectangle "Contrôles d'accès\n(@PreAuthorize)" as RBAC
+  rectangle "Mapping UC → Permissions" as Mapping
+}
+
+' ===================================================================
+'  FLUX EXTERNES
+' ===================================================================
+UserExt --> IAM_External : Authentification\nOIDC Login
+IAM_External --> UserExt : ID Token (JWT)\nAccess Token (JWT)
+
+UserExt --> ExternalApps : Utilisation de l'application
+ExternalApps --> APIGW : Appel API\nAccess Token utilisateur
+APIGW --> CoreService : Requête REST\nJWT validé
+
+' ===================================================================
+'  FLUX INTERNES
+' ===================================================================
+AppInt --> IAM_Internal : Authentification\nClient Credentials
+IAM_Internal --> AppInt : Access Token applicatif (JWT)
+
+AppInt --> APIGW : Appel API\nAccess Token applicatif
+APIGW --> CoreService : Requête REST\nJWT validé
+
+' ===================================================================
+'  SPRING SECURITY
+' ===================================================================
+CoreService --> RBAC : Extraction des rôles/permissions\nà partir du JWT
+RBAC --> Mapping : Vérification des permissions\npour chaque UC métier
+
+@enduml

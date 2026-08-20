@@ -3,11 +3,6 @@
 
 ---
 
-# PARTIE 1 — Choix d’architecture  
-*(DAT allégé — solutions conceptuelles)*
-
----
-
 # 0. Objectif du document
 
 Décrire la solution technique de contrôle d’accès (RBAC) du système, en distinguant :
@@ -22,13 +17,12 @@ Ce document constitue la partie RBAC de la Spécification Technique V6.
 
 # 1. Exigences techniques
 
-Les exigences techniques expriment **des besoins**, jamais des solutions.  
-Les solutions (Spring Security, Kubernetes RBAC, IAM, Terraform, etc.)  
-sont décrites dans la section **Choix d’architecture**.
+Les exigences techniques expriment **des besoins** (formulation : « Le système doit… »).  
+Elles sont ensuite déclinées en **fonctions techniques**, **solutions**, et **composants**.
 
 ---
 
-## 1.1 Exigences techniques locales (liées aux UC métier)
+## 1.1 Exigences techniques locales (RBAC métier — liées aux UC)
 
 - **ET‑RBAC‑MET‑01** : Le système doit contrôler l’accès aux UC métier en fonction du rôle métier de l’utilisateur.  
 - **ET‑RBAC‑MET‑02** : Le système doit appliquer des permissions métier fines pour chaque UC métier.  
@@ -37,85 +31,109 @@ sont décrites dans la section **Choix d’architecture**.
 
 ---
 
-## 1.2 Exigences techniques transverses (RBAC technique)
+## 1.2 Fonctions techniques locales (RBAC métier)
 
-### Kubernetes
+- **FT‑RBAC‑MET‑01** : Le système assure l’autorisation métier via un modèle RBAC basé sur rôles et permissions.  
+- **FT‑RBAC‑MET‑02** : Le système assure la résolution des permissions métier pour chaque UC.  
+- **FT‑RBAC‑MET‑03** : Le système assure l’application des contrôles d’accès avant l’exécution de la logique métier.  
+- **FT‑RBAC‑MET‑04** : Le système assure l’audit des décisions d’autorisation métier.
+
+---
+
+## 1.3 Solutions techniques locales (RBAC métier)
+
+- **ST‑RBAC‑MET‑01** : Nous utiliserons Spring Security pour porter le modèle RBAC métier.  
+- **ST‑RBAC‑MET‑02** : Nous utiliserons des permissions atomiques (`GrantedAuthority`) et des rôles (`ROLE_*`).  
+- **ST‑RBAC‑MET‑03** : Nous utiliserons `@PreAuthorize` et des contrôles dans les services applicatifs.  
+- **ST‑RBAC‑MET‑04** : Nous utiliserons un middleware d’audit pour tracer les décisions ALLOW/DENY.
+
+---
+
+## 1.4 Composants techniques locaux (RBAC métier)
+
+- Spring Security  
+- Filtres de sécurité  
+- Services applicatifs  
+- Middleware d’audit  
+- Enum `Permissions` / Enum `Roles`
+
+---
+
+# 2. Exigences techniques transverses (RBAC technique Kubernetes + Cloud)
+
+---
+
+## 2.1 Exigences techniques transverses — Kubernetes
+
 - **ET‑RBAC‑TECH‑K8S‑01** : Le système doit contrôler l’accès aux ressources Kubernetes.  
-- **ET‑RBAC‑TECH‑K8S‑02** : Le système doit séparer les responsabilités techniques (DEV, OPS, SEC).
+- **ET‑RBAC‑TECH‑K8S‑02** : Le système doit séparer les responsabilités techniques (DEV, OPS, SEC).  
+- **ET‑RBAC‑TECH‑K8S‑03** : Le système doit limiter les permissions par namespace.  
+- **ET‑RBAC‑TECH‑K8S‑04** : Le système doit tracer les actions d’administration Kubernetes.
 
-### Cloud / IAM
+---
+
+## 2.2 Fonctions techniques transverses — Kubernetes
+
+- **FT‑RBAC‑TECH‑K8S‑01** : Le système assure l’autorisation technique sur les ressources du cluster.  
+- **FT‑RBAC‑TECH‑K8S‑02** : Le système assure la séparation des rôles techniques.  
+- **FT‑RBAC‑TECH‑K8S‑03** : Le système assure l’isolation des environnements via les namespaces.  
+- **FT‑RBAC‑TECH‑K8S‑04** : Le système assure l’audit des actions administratives Kubernetes.
+
+---
+
+## 2.3 Solutions techniques transverses — Kubernetes
+
+- **ST‑RBAC‑TECH‑K8S‑01** : Nous utiliserons le RBAC natif Kubernetes (Role, ClusterRole, RoleBinding, ClusterRoleBinding).  
+- **ST‑RBAC‑TECH‑K8S‑02** : Nous utiliserons des rôles techniques dédiés (`ROLE_K8S_DEV`, `ROLE_K8S_OPS`, `ROLE_K8S_SEC`).  
+- **ST‑RBAC‑TECH‑K8S‑03** : Nous utiliserons des namespaces (`dev`, `preprod`, `prod`) pour isoler les environnements.  
+- **ST‑RBAC‑TECH‑K8S‑04** : Nous utiliserons les logs du control plane pour l’audit.
+
+---
+
+## 2.4 Composants techniques transverses — Kubernetes
+
+- Kubernetes RBAC  
+- API Server  
+- Namespaces  
+- Manifests YAML versionnés dans Git  
+- Logs du control plane
+
+---
+
+## 2.5 Exigences techniques transverses — Cloud IAM
+
 - **ET‑RBAC‑TECH‑CLOUD‑01** : Le système doit contrôler l’accès aux ressources cloud.  
-- **ET‑RBAC‑TECH‑CLOUD‑02** : Le système doit séparer les responsabilités techniques (INFRA, PLATFORM, SECURITY).
-
-### Audit
-- **ET‑RBAC‑TECH‑AUD‑01** : Le système doit tracer les actions d’administration Kubernetes et IAM.
-
----
-
-# 2. Choix d’architecture
-
-Les choix d’architecture sont les **solutions techniques** retenues pour répondre aux exigences ci‑dessus.
+- **ET‑RBAC‑TECH‑CLOUD‑02** : Le système doit séparer les responsabilités techniques (INFRA, PLATFORM, SECURITY).  
+- **ET‑RBAC‑TECH‑CLOUD‑03** : Le système doit tracer les actions IAM.  
+- **ET‑RBAC‑TECH‑CLOUD‑04** : Le système doit appliquer le principe de moindre privilège.
 
 ---
 
-## 2.1 Choix d’architecture — RBAC métier (applicatif)
+## 2.6 Fonctions techniques transverses — Cloud IAM
 
-### Framework de sécurité
-**Spring Security** portera le modèle RBAC métier.  
-Justification : support natif des rôles, permissions, filtres, annotations.
-
-### Modèle d’autorisation
-- Permissions métier → `GrantedAuthority`.  
-- Rôles métier → `ROLE_*`.  
-- Mapping UC → permission dans les services applicatifs.
-
-### Point d’application des contrôles
-- Endpoints REST via `@PreAuthorize`.  
-- Services applicatifs via vérification programmatique.
-
-### Audit
-- Log des décisions d’autorisation (ALLOW/DENY).  
-- Corrélation ID.
+- **FT‑RBAC‑TECH‑CLOUD‑01** : Le système assure l’autorisation technique sur les ressources cloud via IAM.  
+- **FT‑RBAC‑TECH‑CLOUD‑02** : Le système assure la séparation des rôles techniques cloud.  
+- **FT‑RBAC‑TECH‑CLOUD‑03** : Le système assure l’audit des actions IAM.  
+- **FT‑RBAC‑TECH‑CLOUD‑04** : Le système assure la gestion des permissions cloud minimales.
 
 ---
 
-## 2.2 Choix d’architecture — RBAC technique Kubernetes
+## 2.7 Solutions techniques transverses — Cloud IAM
 
-### Mécanisme d’autorisation
-**RBAC natif Kubernetes** :  
-`Role`, `ClusterRole`, `RoleBinding`, `ClusterRoleBinding`.
-
-### Rôles techniques
-- `ROLE_K8S_DEV`  
-- `ROLE_K8S_OPS`  
-- `ROLE_K8S_SEC`
-
-### Isolation
-Namespaces : `dev`, `preprod`, `prod`.
-
-### Audit
-Logs du control plane.
+- **ST‑RBAC‑TECH‑CLOUD‑01** : Nous utiliserons IAM (roles, policies) pour gérer les permissions cloud.  
+- **ST‑RBAC‑TECH‑CLOUD‑02** : Nous utiliserons des rôles techniques IAM (`ROLE_INFRA_ADMIN`, `ROLE_PLATFORM_ADMIN`, `ROLE_SECURITY_ADMIN`).  
+- **ST‑RBAC‑TECH‑CLOUD‑03** : Nous utiliserons Terraform pour gérer les rôles et policies IAM.  
+- **ST‑RBAC‑TECH‑CLOUD‑04** : Nous utiliserons CloudTrail pour l’audit IAM.
 
 ---
 
-## 2.3 Choix d’architecture — RBAC technique Cloud (IAM / Terraform)
+## 2.8 Composants techniques transverses — Cloud IAM
 
-### Gestion des identités techniques
-**IAM** pour :  
-- identités techniques,  
-- rôles IAM,  
-- policies IAM.
-
-### Rôles techniques IAM
-- `ROLE_INFRA_ADMIN`  
-- `ROLE_PLATFORM_ADMIN`  
-- `ROLE_SECURITY_ADMIN`
-
-### Gestion déclarative
-**Terraform** pour gérer les rôles et policies IAM.
-
-### Audit
-Logs IAM / CloudTrail.
+- AWS IAM  
+- AWS STS  
+- Policies IAM  
+- Terraform  
+- CloudTrail
 
 ---
 
@@ -232,7 +250,7 @@ Logs IAM / CloudTrail.
 
 Cette Spec Technique V6 (RBAC) fournit :
 
-- une **Partie 1** conceptuelle (exigences + architecture),  
+- une **Partie 1** conceptuelle (exigences → fonctions → solutions → composants),  
 - une **Partie 2** opérationnelle (guidelines d’implémentation),  
 - un modèle RBAC métier clair,  
 - un modèle RBAC technique Kubernetes,  
@@ -240,4 +258,3 @@ Cette Spec Technique V6 (RBAC) fournit :
 - une séparation stricte entre les trois couches de gouvernance.
 
 Document stabilisé, prêt pour intégration dans la Spec Technique V6.
-
